@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170" height="110" viewBox="0 0 170 110" fill="none" shape-rendering="geometricPrecision">
+  <defs>
+    <linearGradient id="branch" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#96645A"/>
+      <stop offset="1" stop-color="#5C342E"/>
+    </linearGradient>
+    <radialGradient id="petalA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) rotate(90) scale(16)">
+      <stop offset="0" stop-color="#FFF9FD"/>
+      <stop offset="0.45" stop-color="#FFD8EA"/>
+      <stop offset="1" stop-color="#F39AC5"/>
+    </radialGradient>
+  </defs>
+  <g>
+    <path d="M26 86c22-10 44-31 68-61" stroke="url(#branch)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M58 57c18-2 34 5 55 24" stroke="url(#branch)" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M73 37c13-1 24 6 38 19" stroke="url(#branch)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M43 69c8-8 20-13 34-15" stroke="url(#branch)" stroke-width="4" stroke-linecap="round"/>
+    <g>
+      <g transform="translate(91 24) rotate(16)"><circle r="12" fill="url(#petalA)"/><circle cx="0" cy="0" r="2.4" fill="#FFF8C9"/></g>
+      <g transform="translate(112 42) rotate(-6)"><circle r="11" fill="url(#petalA)"/><circle cx="0" cy="0" r="2.3" fill="#FFF8C9"/></g>
+      <g transform="translate(69 54) rotate(11)"><circle r="10" fill="url(#petalA)"/><circle cx="0" cy="0" r="2.1" fill="#FFF8C9"/></g>
+      <g transform="translate(104 62) rotate(8)"><circle r="8" fill="url(#petalA)"/><circle cx="0" cy="0" r="1.8" fill="#FFF8C9"/></g>
+    </g>
+    <g opacity="0.42">
+      <ellipse cx="38" cy="80" rx="34" ry="14" fill="#FFFFFF" fill-opacity="0.85"/>
+      <ellipse cx="62" cy="72" rx="22" ry="10" fill="#FDF8FF" fill-opacity="0.8"/>
+    </g>
+  </g>
+</svg>

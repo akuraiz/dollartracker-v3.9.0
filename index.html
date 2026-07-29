@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-template="mono">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DollarTracker" />
+  <title>DollarTracker</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800;900&family=Noto+Sans+Khmer:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=3.8.1" />
+</head>
+<body>
+  <div class="aurora-bg" aria-hidden="true">
+    <span class="orb orb-one"></span>
+    <span class="orb orb-two"></span>
+    <span class="orb orb-three"></span>
+  </div>
+
+  <div class="app-shell">
+    <header class="topbar glass">
+      <div class="title-stack">
+        <p class="eyebrow" id="eyebrow">Private local ledger</p>
+        <h1 id="pageTitle">Home</h1>
+      </div>
+      <button class="language-toggle glass-lite" id="languageToggle" type="button" aria-label="Change language">
+        <img id="languageFlag" src="flag-en.png" alt="" />
+        <span id="languageCode">EN</span>
+      </button>
+    </header>
+
+    <main class="content">
+      <section class="page active" id="page-home" data-title-key="home">
+        <section class="balance-hero glass-strong">
+          <span class="theme-signature" aria-hidden="true"><span class="sig-a"></span><span class="sig-b"></span><span class="sig-c"></span><span class="sig-d"></span></span>
+          <div class="hero-top">
+            <span class="status-pill"><span class="pulse"></span><span id="localOnlyText">Local only</span></span>
+            <span id="homeRecordCountSmall">0 records</span>
+          </div>
+
+          <div class="hero-main">
+            <p id="balanceLeftLabel">Balance Left</p>
+            <h2 id="homeBalance">$0.00</h2>
+          </div>
+
+          <div class="hero-footer">
+            <div class="currency-switch glass-lite">
+              <button type="button" class="currency-card-btn active" data-currency="USD">USD</button>
+              <button type="button" class="currency-card-btn" data-currency="KHR">KHR</button>
+            </div>
+            <button type="button" class="mini-link" id="copyBalanceBtn">Copy</button>
+          </div>
+          <p class="rate-note" id="rateNote">1 USD = 4000៛</p>
+        </section>
+
+        <section class="backup-reminder glass hidden" id="backupReminder">
+          <div>
+            <h3 id="backupReminderTitle">Backup Reminder</h3>
+            <p class="hint" id="backupReminderText">It has been a while since your last backup. Export one now so your records stay safe.</p>
+          </div>
+          <div class="backup-reminder-actions">
+            <button class="primary-button compact-button" type="button" id="backupReminderExportBtn">Export Backup JSON</button>
+            <button class="ghost-button" type="button" id="backupReminderDismissBtn">Dismiss</button>
+          </div>
+        </section>
+
+        <section class="quick-actions">
+          <button class="quick-card out-card" type="button" data-go="add" data-prefill="Out">
+            <span>−</span><strong id="addOutText">Add Out</strong><small id="moneyUsedText">Amount used</small>
+          </button>
+          <button class="quick-card in-card" type="button" data-go="add" data-prefill="In">
+            <span>＋</span><strong id="addInText">Add In</strong><small id="moneyAddedText">Amount added</small>
+          </button>
+        </section>
+
+        <section class="stats-grid">
+          <article class="stat-card glass"><p id="totalInLabel">Total In</p><strong id="homeTotalIn">$0.00</strong></article>
+          <article class="stat-card glass"><p id="totalOutLabel">Total Out</p><strong id="homeTotalOut">$0.00</strong></article>
+          <article class="stat-card glass wide">
+            <p id="amountUsedLabel">Amount Used</p>
+            <div class="progress-track"><span id="usedProgress"></span></div>
+            <small id="usedProgressText">0% of received amount used</small>
+          </article>
+        </section>
+
+
+        <section class="panel glass monthly-panel">
+          <div class="panel-head">
+            <div>
+              <h3 id="monthlyTitle">This Month</h3>
+              <p class="hint" id="monthlyHint">Quick monthly view</p>
+            </div>
+          </div>
+          <div class="mini-summary-grid">
+            <article><span id="monthlyInLabel">In</span><strong id="monthlyIn">$0.00</strong></article>
+            <article><span id="monthlyOutLabel">Out</span><strong id="monthlyOut">$0.00</strong></article>
+            <article><span id="monthlyBalanceLabel">Balance</span><strong id="monthlyBalance">$0.00</strong></article>
+          </div>
+          <p class="hint monthly-category" id="monthlyTopCategory">Top category: None</p>
+        </section>
+
+        <section class="panel glass budget-panel optional-home-panel" id="budgetPanel">
+          <div class="panel-head">
+            <div>
+              <h3 id="monthlyBudgetsTitle">Monthly Budgets</h3>
+              <p class="hint" id="monthlyBudgetsHint">Track spending caps for this month.</p>
+            </div>
+          </div>
+          <div class="budget-list" id="budgetProgressList"></div>
+        </section>
+
+        <section class="panel glass category-chart-panel optional-home-panel" id="categoryChartPanel">
+          <div class="panel-head">
+            <div>
+              <h3 id="categoryChartTitle">Category Breakdown</h3>
+              <p class="hint" id="categoryChartHint">This month’s spending by category.</p>
+            </div>
+          </div>
+          <div class="category-chart-list" id="categoryChartList"></div>
+        </section>
+
+        <section class="panel glass">
+          <div class="panel-head">
+            <div><h3 id="recentTitle">Recent</h3><p class="hint" id="latestMovementText">Latest transaction</p></div>
+            <button class="ghost-button" type="button" data-go="history" id="viewAllBtn">View all</button>
+          </div>
+          <div class="record-list compact" id="recentList"></div>
+        </section>
+      </section>
+
+      <section class="page" id="page-add" data-title-key="addRecord">
+        <section class="panel glass">
+          <div class="section-title add-title-row"><div><h3 id="newTransactionTitle">New Transaction</h3><p class="hint" id="positiveOnlyText">Enter positive numbers only. Type decides in or out.</p></div><button class="ghost-button compact-button" type="button" id="openQuickAddBtn">Quick Add</button></div>
+          <form id="transactionForm" class="form" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false">
+            <label><span id="typeLabel">Type</span>
+              <div class="segmented glass-lite">
+                <input type="radio" name="type" id="typeOut" value="Out" checked /><label for="typeOut" id="outLabel">Out</label>
+                <input type="radio" name="type" id="typeIn" value="In" /><label for="typeIn" id="inLabel">In</label>
+              </div>
+            </label>
+
+            <label><span id="amountLabel">Amount</span>
+              <div class="amount-wrap"><span id="amountCurrency">$</span><input id="amountInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="8.60" required /><button class="calc-open-btn" type="button" id="openCalcBtn" aria-label="Open calculator">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="6" y="3.5" width="12" height="17" rx="3"></rect>
+                    <path d="M9 7h6"></path>
+                    <path d="M9 11h.01M12 11h.01M15 11h.01"></path>
+                    <path d="M9 14h.01M12 14h.01M15 14h.01"></path>
+                    <path d="M9 17h.01M12 17h.01M15 17h.01"></path>
+                  </svg>
+                </button></div>
+            </label>
+
+            <div class="amount-chips" id="amountChips"></div>
+
+            <label><span id="categoryLabel">Category</span>
+              <select id="categoryInput"></select>
+            </label>
+
+            <label><span id="whatForLabel">Description</span><input id="descriptionInput" type="text" placeholder="Food, AC transfer, coffee..." autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" /></label>
+            <div class="quick-desc-chips" id="quickDescChips"></div>
+            <label><span id="dateLabel">Date</span><input id="dateInput" type="date" required /></label>
+            <label><span id="noteLabel">Note</span><textarea id="noteInput" rows="2" placeholder="Optional note" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false"></textarea></label>
+            <button class="primary-button full" type="submit" id="saveRecordBtn">Save Record</button>
+          </form>
+        </section>
+
+        <section class="panel glass mini-help">
+          <h3 id="rememberTitle">Remember</h3>
+          <p id="rememberText"></p>
+        </section>
+      </section>
+
+      <section class="page" id="page-history" data-title-key="history">
+        <section class="panel glass">
+          <div class="panel-head">
+            <div><h3 id="allRecordsTitle">All Records</h3><p class="hint" id="historyHintText">Search, filter, and review your records.</p></div>
+            <div class="history-head-actions">
+              <button class="ghost-button" type="button" id="selectModeBtn">Select</button>
+              <button class="ghost-button" type="button" id="summaryBtn">Summary</button>
+            </div>
+          </div>
+
+          <div class="history-tools history-tools-clean">
+            <input id="searchInput" type="search" placeholder="Search records..." aria-label="Search records" />
+            <button class="history-filter-btn" type="button" id="openHistoryFilterBtn" aria-label="Filter records">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 6h16"></path>
+                <path d="M7 12h10"></path>
+                <path d="M10 18h4"></path>
+              </svg>
+              <span id="openFilterText">Filter</span>
+            </button>
+          </div>
+
+          <div class="filter-row">
+            <button class="chip active" type="button" data-filter="All" id="filterAll">All</button>
+            <button class="chip" type="button" data-filter="In" id="filterIn">In</button>
+            <button class="chip" type="button" data-filter="Out" id="filterOut">Out</button>
+          </div>
+
+          <div class="record-list" id="historyList"></div>
+        </section>
+      </section>
+
+      <section class="page" id="page-backup" data-title-key="backup">
+        <section class="panel glass">
+          <div class="section-title"><h3 id="backupExportTitle">Backup & Export</h3><p class="hint" id="backupHintText">Your records stay in this browser. Export backup regularly.</p></div>
+          <div class="backup-card"><span id="lastBackupLabel">Last backup</span><strong id="lastBackupText">Never</strong></div>
+          <div class="button-stack">
+            <button class="primary-button full" type="button" id="exportBackupBtn">Export Backup JSON</button>
+            <button class="secondary-button full" type="button" id="exportCsvBtn">Export CSV</button>
+            <label class="file-button full"><span id="importBackupText">Import Backup JSON</span><input id="importBackupInput" type="file" accept="application/json,.json" /></label>
+          </div>
+        </section>
+
+        <section class="panel glass"><h3 id="safetyHabitTitle">Safety habit</h3><p class="hint" id="safetyHintText">After adding records, export a backup and save it to iCloud Drive or Google Drive.</p></section>
+      </section>
+
+      <section class="page" id="page-settings" data-title-key="settings">
+        <section class="panel glass">
+          <h3 id="appearanceTitle">Appearance</h3>
+          <label><span id="displayModeLabel">Display Mode</span>
+            <div class="segmented glass-lite">
+              <input type="radio" name="displayMode" id="modeDark" value="dark" /><label for="modeDark" id="darkLabel">Dark</label>
+              <input type="radio" name="displayMode" id="modeLight" value="light" /><label for="modeLight" id="lightLabel">Light</label>
+            </div>
+          </label>
+
+          <div class="template-block">
+            <span class="setting-label" id="themeTemplateLabel">Theme Template</span>
+            <div class="theme-groups">
+              <div class="theme-group">
+                <span class="theme-group-title" id="coreThemesText">Core</span>
+                <div class="theme-templates">
+                  <button type="button" class="template-option" data-template-choice="mono"><span class="template-preview mono-preview"></span><strong id="monoThemeText">Silver</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="gold"><span class="template-preview gold-preview"></span><strong id="goldThemeText">Gold</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="sky"><span class="template-preview sky-preview"></span><strong id="skyThemeText">Sky</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="matcha"><span class="template-preview matcha-preview"></span><strong id="matchaThemeText">Matcha</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="sunset"><span class="template-preview sunset-preview"></span><strong id="sunsetThemeText">Sunset</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="lavender"><span class="template-preview lavender-preview"></span><strong id="lavenderThemeText">Lavender</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                </div>
+              </div>
+              <div class="theme-group">
+                <span class="theme-group-title" id="signatureThemesText">Signature</span>
+                <div class="theme-templates">
+                  <button type="button" class="template-option" data-template-choice="christmas"><span class="template-preview christmas-preview"></span><strong id="christmasThemeText">Frost Pine</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="pink"><span class="template-preview pink-preview"></span><strong id="pinkThemeText">Pink</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="web"><span class="template-preview web-preview"></span><strong id="webThemeText">Web</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="symbiote"><span class="template-preview symbiote-preview"></span><strong id="symbioteThemeText">Symbiote</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="blush"><span class="template-preview blush-preview"></span><strong id="blushThemeText">Blush Pop</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="ocean"><span class="template-preview ocean-preview"></span><strong id="oceanThemeText">Ocean</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                  <button type="button" class="template-option" data-template-choice="pearl"><span class="template-preview pearl-preview"></span><strong id="pearlThemeText">Pearl</strong><svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel glass">
+          <h3 id="moneySettingsTitle">Money Settings</h3>
+          <label class="setting-row">
+            <div><strong id="exchangeRateTitle">Exchange Rate</strong><p class="hint" id="exchangeRateHint">Default: 1 USD = 4000៛</p></div>
+            <input id="exchangeRateInput" type="number" min="1" step="1" value="4000" />
+          </label>
+          <label class="setting-row">
+            <div><strong id="appNameTitle">App Name</strong><p class="hint" id="appNameHint">Shown inside the app</p></div>
+            <input id="appNameInput" type="text" value="DollarTracker" />
+          </label>
+          <button class="secondary-button full" type="button" id="saveSettingsBtn">Save Settings</button>
+        </section>
+
+        <section class="panel glass category-manager-panel settings-collapse-panel">
+          <details class="settings-collapse">
+            <summary>
+              <div class="section-title">
+                <h3 id="categoryManagerTitle">Manage Categories</h3>
+                <p class="hint" id="categoryManagerHint">Add, rename, remove, or reset categories.</p>
+              </div>
+              <span class="collapse-arrow" aria-hidden="true">⌄</span>
+            </summary>
+
+            <div class="settings-collapse-body">
+              <div class="category-add-row">
+                <input id="newCategoryInput" type="text" maxlength="28" placeholder="New category name" autocomplete="off" aria-label="New category name" />
+                <button class="secondary-button compact-button" type="button" id="addCategoryBtn">Add</button>
+              </div>
+
+              <div class="category-manager-list" id="categoryManagerList"></div>
+
+              <button class="secondary-button full compact-button" type="button" id="resetCategoriesBtn">Reset to Default</button>
+            </div>
+          </details>
+        </section>
+
+        <section class="panel glass settings-collapse-panel">
+          <details class="settings-collapse">
+            <summary>
+              <div class="section-title">
+                <h3 id="categoryBudgetsTitle">Category Budgets</h3>
+                <p class="hint" id="categoryBudgetsHint">Monthly caps per category. Stored internally in USD.</p>
+              </div>
+              <span class="collapse-arrow" aria-hidden="true">⌄</span>
+            </summary>
+
+            <div class="settings-collapse-body">
+              <p class="hint budget-currency-note" id="budgetCurrencyNote">Shown in current display currency.</p>
+              <div class="budget-input-list" id="budgetInputList"></div>
+              <button class="secondary-button full" type="button" id="saveBudgetsBtn">Save Budgets</button>
+            </div>
+          </details>
+        </section>
+
+        <section class="panel glass danger-panel">
+          <h3 id="dangerZoneTitle">Danger Zone</h3>
+          <p class="hint" id="dangerHintText">Tap twice to clear all records.</p>
+          <button class="danger-button full" type="button" id="clearDataBtn">Clear All Records</button>
+        </section>
+      </section>
+    </main>
+
+    <button class="primary-button floating-save-button" type="submit" form="transactionForm" id="floatingSaveRecordBtn" aria-hidden="true">Save Record</button>
+
+    <div class="selection-float glass-strong hidden" id="selectionFloat" aria-live="polite">
+      <div class="selection-float-copy">
+        <span id="selectionCount">0 selected</span>
+        <small id="selectionTotalLabel">Selected total</small>
+        <strong id="selectionTotal">$0.00</strong>
+      </div>
+      <button class="ghost-button compact-button" type="button" id="clearSelectionBtn">Clear</button>
+    </div>
+
+    <nav class="bottom-nav glass" aria-label="Main navigation"><span class="nav-active-pill" aria-hidden="true"></span>
+      <button class="nav-item active" type="button" data-page="home"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/></svg></span><span class="nav-label" id="navHome">Home</span></button>
+      <button class="nav-item" type="button" data-page="add"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span><span class="nav-label" id="navAdd">Add</span></button>
+      <button class="nav-item" type="button" data-page="history"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 6h12"/><path d="M8 12h12"/><path d="M8 18h12"/><path d="M4 6h.01"/><path d="M4 12h.01"/><path d="M4 18h.01"/></svg></span><span class="nav-label" id="navHistory">History</span></button>
+      <button class="nav-item" type="button" data-page="backup"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg></span><span class="nav-label" id="navBackup">Backup</span></button>
+      <button class="nav-item" type="button" data-page="settings"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2.1 2.1 0 1 1-2.98 2.98l-.04-.04A1.8 1.8 0 0 0 14.8 19.6a1.8 1.8 0 0 0-1.08 1.65V21.4a2.1 2.1 0 1 1-4.2 0v-.15A1.8 1.8 0 0 0 8.45 19.6a1.8 1.8 0 0 0-1.98.36l-.04.04a2.1 2.1 0 1 1-2.98-2.98l.04-.04A1.8 1.8 0 0 0 3.85 15a1.8 1.8 0 0 0-1.65-1.08H2.05a2.1 2.1 0 1 1 0-4.2h.15a1.8 1.8 0 0 0 1.65-1.08 1.8 1.8 0 0 0-.36-1.98l-.04-.04a2.1 2.1 0 1 1 2.98-2.98l.04.04a1.8 1.8 0 0 0 1.98.36 1.8 1.8 0 0 0 1.08-1.65V2.2a2.1 2.1 0 1 1 4.2 0v.15a1.8 1.8 0 0 0 1.08 1.65 1.8 1.8 0 0 0 1.98-.36l.04-.04a2.1 2.1 0 1 1 2.98 2.98l-.04.04a1.8 1.8 0 0 0-.36 1.98 1.8 1.8 0 0 0 1.65 1.08h.15a2.1 2.1 0 1 1 0 4.2h-.15A1.8 1.8 0 0 0 19.4 15Z"/></svg></span><span class="nav-label" id="navSettings">Settings</span></button>
+    </nav>
+
+    <div class="summary-sheet-backdrop" id="summaryBackdrop">
+      <section class="summary-sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
+        <div class="panel-head"><div><h3 id="summaryTitle">Summary</h3><p class="hint" id="summaryHint">Based on current History filters.</p></div><button class="ghost-button" type="button" id="closeSummaryBtn">Close</button></div>
+        <div class="summary-grid">
+          <article><span id="summaryInLabel">Total In</span><strong id="summaryIn">$0.00</strong></article>
+          <article><span id="summaryOutLabel">Total Out</span><strong id="summaryOut">$0.00</strong></article>
+          <article><span id="summaryBalanceLabel">Balance Left</span><strong id="summaryBalance">$0.00</strong></article>
+        </div>
+        <div class="graph-card">
+          <div class="graph-row"><span id="summaryInGraphLabel">Total In</span><div class="bar-track"><i id="summaryInBar"></i></div></div>
+          <div class="graph-row"><span id="summaryOutGraphLabel">Total Out</span><div class="bar-track"><i id="summaryOutBar"></i></div></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="filter-sheet-backdrop" id="historyFilterBackdrop">
+      <section class="filter-sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="historyFilterTitle">
+        <div class="panel-head">
+          <div>
+            <h3 id="historyFilterTitle">Filter Records</h3>
+            <p class="hint" id="historyFilterHint">Narrow records by date or sorting.</p>
+          </div>
+          <button class="ghost-button" type="button" id="closeHistoryFilterBtn">Close</button>
+        </div>
+
+        <div class="filter-sheet-form">
+          <div class="date-row">
+            <label><span id="fromDateLabel">From</span><input id="fromDateInput" type="date" /></label>
+            <label><span id="toDateLabel">To</span><input id="toDateInput" type="date" /></label>
+          </div>
+
+          <label>
+            <span id="sortByLabel">Sort by</span>
+            <select id="sortSelect">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="high">Highest amount</option>
+              <option value="low">Lowest amount</option>
+            </select>
+          </label>
+
+          <div class="filter-sheet-actions">
+            <button class="secondary-button compact-button" type="button" id="clearFiltersBtn">Clear Filters</button>
+            <button class="secondary-button compact-button" type="button" id="selectVisibleBtn">Select visible</button>
+            <button class="primary-button compact-button" type="button" id="applyHistoryFilterBtn">Apply Filters</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+
+    <div class="edit-sheet-backdrop" id="editBackdrop">
+      <section class="edit-sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+        <div class="panel-head">
+          <div>
+            <h3 id="editTitle">Edit Record</h3>
+            <p class="hint" id="editHint">History amounts stay locked unless you edit this record.</p>
+          </div>
+          <button class="ghost-button" type="button" id="closeEditBtn">Close</button>
+        </div>
+
+        <form id="editRecordForm" class="form">
+          <input type="hidden" id="editRecordId" />
+
+          <label>
+            <span id="editTypeLabel">Type</span>
+            <div class="segmented glass-lite">
+              <input type="radio" name="editType" id="editTypeOut" value="Out" />
+              <label for="editTypeOut" id="editOutLabel">Out</label>
+              <input type="radio" name="editType" id="editTypeIn" value="In" />
+              <label for="editTypeIn" id="editInLabel">In</label>
+            </div>
+          </label>
+
+          <div class="edit-money-row">
+            <label>
+              <span id="editCurrencyLabel">Currency</span>
+              <select id="editCurrencyInput">
+                <option value="USD">USD</option>
+                <option value="KHR">KHR</option>
+              </select>
+            </label>
+
+            <label>
+              <span id="editAmountLabel">Amount</span>
+              <input id="editAmountInput" type="number" inputmode="decimal" min="0" step="0.01" required />
+            </label>
+          </div>
+
+          <label>
+            <span id="editCategoryLabel">Category</span>
+            <select id="editCategoryInput"></select>
+          </label>
+
+          <label>
+            <span id="editDescriptionLabel">Description</span>
+            <input id="editDescriptionInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" />
+          </label>
+
+          <label>
+            <span id="editDateLabel">Date</span>
+            <input id="editDateInput" type="date" required />
+          </label>
+
+          <label>
+            <span id="editNoteLabel">Note</span>
+            <textarea id="editNoteInput" rows="3" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false"></textarea>
+          </label>
+
+          <button class="primary-button full" type="submit" id="saveEditBtn">Save Changes</button>
+        </form>
+
+        <div class="edit-log-block">
+          <h4 id="editHistoryTitle">Edit History</h4>
+          <div id="editHistoryList" class="edit-history-list"></div>
+        </div>
+      </section>
+    </div>
+
+
+    <div class="quick-add-backdrop" id="quickAddBackdrop">
+      <section class="quick-add-sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="quickAddTitle">
+        <div class="panel-head">
+          <div>
+            <h3 id="quickAddTitle">Quick Add</h3>
+            <p class="hint" id="quickAddHint">Fast entry with clean presets.</p>
+          </div>
+          <button class="ghost-button" type="button" id="closeQuickAddBtn">Close</button>
+        </div>
+
+        <form id="quickAddForm" class="form" autocomplete="off">
+          <label>
+            <span id="quickAddTypeLabel">Type</span>
+            <div class="segmented glass-lite">
+              <input type="radio" name="quickAddType" id="quickAddTypeOut" value="Out" checked />
+              <label for="quickAddTypeOut" id="quickAddOutLabel">Out</label>
+              <input type="radio" name="quickAddType" id="quickAddTypeIn" value="In" />
+              <label for="quickAddTypeIn" id="quickAddInLabel">In</label>
+            </div>
+          </label>
+
+          <div class="quick-add-presets" id="quickAddPresetList"></div>
+
+          <label>
+            <span id="quickAddAmountLabel">Amount</span>
+            <div class="amount-wrap"><span id="quickAddCurrency">$</span><input id="quickAddAmountInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="8.60" required /></div>
+          </label>
+
+          <button class="primary-button full" type="submit" id="saveQuickAddBtn">Save Quick Add</button>
+          <button class="secondary-button full" type="button" id="openFullAddFromQuickBtn">Open full Add</button>
+        </form>
+      </section>
+    </div>
+
+    <div class="calculator-backdrop" id="calculatorBackdrop">
+      <section class="calculator-sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="calculatorTitle">
+        <div class="panel-head">
+          <div>
+            <h3 id="calculatorTitle">Calculator</h3>
+            <p class="hint" id="calculatorHint">Calculate and use as amount.</p>
+          </div>
+          <button class="ghost-button" type="button" id="closeCalcBtn">Close</button>
+        </div>
+        <div class="calc-currency-switch glass-lite">
+          <button type="button" class="calc-currency-btn active" data-calc-currency="USD">USD</button>
+          <button type="button" class="calc-currency-btn" data-calc-currency="KHR">KHR</button>
+        </div>
+        <div class="calc-display" id="calcDisplay">0</div>
+        <div class="calc-grid">
+          <button type="button" data-calc-clear="true">C</button>
+          <button type="button" class="calc-icon-key" data-calc-back="true" aria-label="Delete last digit">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 5.5v13a2 2 0 0 1-2 2H9.4a2 2 0 0 1-1.5-.68L2.8 14a3 3 0 0 1 0-4l5.1-5.82a2 2 0 0 1 1.5-.68H19a2 2 0 0 1 2 2Z"></path>
+              <path d="M10.7 9.2l4.6 4.6"></path>
+              <path d="M15.3 9.2l-4.6 4.6"></path>
+            </svg>
+          </button>
+          <button type="button" data-calc-op="÷">÷</button>
+          <button type="button" data-calc-op="×">×</button>
+          <button type="button" data-calc-num="7">7</button>
+          <button type="button" data-calc-num="8">8</button>
+          <button type="button" data-calc-num="9">9</button>
+          <button type="button" data-calc-op="-">−</button>
+          <button type="button" data-calc-num="4">4</button>
+          <button type="button" data-calc-num="5">5</button>
+          <button type="button" data-calc-num="6">6</button>
+          <button type="button" data-calc-op="+">+</button>
+          <button type="button" data-calc-num="1">1</button>
+          <button type="button" data-calc-num="2">2</button>
+          <button type="button" data-calc-num="3">3</button>
+          <button type="button" data-calc-equals="true">=</button>
+          <button type="button" data-calc-num="0" class="span-two">0</button>
+          <button type="button" data-calc-dot="true" id="calcDotBtn">.</button>
+          <button type="button" class="use-amount-btn" id="useCalcAmountBtn">Use Amount</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast glass-strong" id="toast"></div>
+  </div>
+  <script src="app.js?v=3.8.1"></script>
+</body>
+</html>
