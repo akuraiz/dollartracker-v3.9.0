@@ -1,20 +1,21 @@
-# DollarTracker v3.8.1 Refinement Pack
+# DollarTracker v3.9.0 Family Profiles
 
-Focus: iPhone smoothness, clearer History selection, Quick Add, and safer backup import without crowding the UI.
+Focus: add a clean Profile Manager for separate family ledgers while keeping the UI simple, local-only, and iPhone-safe.
 
-## v3.8.1 changes
+## v3.9.0 changes
 
-- History selection is now intentional: tap **Select** or long-press a record to enter selection mode.
-- Selection circles stay hidden during normal browsing so History looks calmer.
-- Tapping cards selects them only while selection mode is active.
-- Added **Select visible** in the History filter sheet for the currently visible filtered records.
-- Changing search, filters, sorting, or navigation clears selection to avoid stale totals.
-- Added a small **Quick Add** sheet with practical presets and the current USD/KHR mode.
-- Add nav long-press opens Quick Add; the Add page also has a visible Quick Add button.
-- Backup import now previews record count, export date, and version before replacing current records.
-- Backup reminder also appears after 10+ new records since the last backup.
-- Reduced mobile glass blur pressure and added containment hints for smoother iPhone scrolling.
-- Kept recurring transactions out of this build to avoid adding a confusing management UI before the core flows are fully tested on phone.
+- Added **Family Profiles** for separate ledgers such as Me, Mom, Dad, and Brother.
+- Existing records migrate safely into the default **Me** profile with no money recalculation.
+- The top bar now has a small profile switcher beside the language control.
+- Profile switching updates Home, History, monthly summary, budgets, categories, selected totals, and drafts to the active profile.
+- Added a compact Profile sheet with switch, create, rename, archive, restore, delete, and photo controls.
+- Profile photos are chosen from the device, cropped to a square, resized to 192×192, compressed as JPEG, and stored locally in the backup/settings data.
+- Each profile has its own categories and category budgets; theme, language, exchange rate, and app name remain shared.
+- JSON backup/export now includes all profiles, all records, profile photos, and profile metadata.
+- Backup import preview now shows profile count and record count before replacing data.
+- CSV export now includes a **Profile** column.
+- History selection and open swipe actions clear when switching profiles to avoid confusing totals or stale actions.
+- Kept recurring transactions out of this build so the new profile system can be tested cleanly first.
 
 # DollarTracker Stable v3
 

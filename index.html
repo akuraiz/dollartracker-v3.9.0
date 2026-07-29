@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800;900&family=Noto+Sans+Khmer:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3.8.1" />
+  <link rel="stylesheet" href="styles.css?v=3.9.0" />
 </head>
 <body>
   <div class="aurora-bg" aria-hidden="true">
@@ -29,10 +29,16 @@
         <p class="eyebrow" id="eyebrow">Private local ledger</p>
         <h1 id="pageTitle">Home</h1>
       </div>
-      <button class="language-toggle glass-lite" id="languageToggle" type="button" aria-label="Change language">
-        <img id="languageFlag" src="flag-en.png" alt="" />
-        <span id="languageCode">EN</span>
-      </button>
+      <div class="topbar-actions">
+        <button class="profile-switch-button glass-lite" id="profileSwitchBtn" type="button" aria-label="Switch profile">
+          <span id="activeProfileAvatar" class="profile-avatar">ME</span>
+          <span id="activeProfileName" class="profile-name-small">Me</span>
+        </button>
+        <button class="language-toggle glass-lite" id="languageToggle" type="button" aria-label="Change language">
+          <img id="languageFlag" src="flag-en.png" alt="" />
+          <span id="languageCode">EN</span>
+        </button>
+      </div>
     </header>
 
     <main class="content">
@@ -344,6 +350,37 @@
       <button class="nav-item" type="button" data-page="settings"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2.1 2.1 0 1 1-2.98 2.98l-.04-.04A1.8 1.8 0 0 0 14.8 19.6a1.8 1.8 0 0 0-1.08 1.65V21.4a2.1 2.1 0 1 1-4.2 0v-.15A1.8 1.8 0 0 0 8.45 19.6a1.8 1.8 0 0 0-1.98.36l-.04.04a2.1 2.1 0 1 1-2.98-2.98l.04-.04A1.8 1.8 0 0 0 3.85 15a1.8 1.8 0 0 0-1.65-1.08H2.05a2.1 2.1 0 1 1 0-4.2h.15a1.8 1.8 0 0 0 1.65-1.08 1.8 1.8 0 0 0-.36-1.98l-.04-.04a2.1 2.1 0 1 1 2.98-2.98l.04.04a1.8 1.8 0 0 0 1.98.36 1.8 1.8 0 0 0 1.08-1.65V2.2a2.1 2.1 0 1 1 4.2 0v.15a1.8 1.8 0 0 0 1.08 1.65 1.8 1.8 0 0 0 1.98-.36l.04-.04a2.1 2.1 0 1 1 2.98 2.98l-.04.04a1.8 1.8 0 0 0-.36 1.98 1.8 1.8 0 0 0 1.65 1.08h.15a2.1 2.1 0 1 1 0 4.2h-.15A1.8 1.8 0 0 0 19.4 15Z"/></svg></span><span class="nav-label" id="navSettings">Settings</span></button>
     </nav>
 
+
+    <div class="profile-sheet-backdrop" id="profileBackdrop">
+      <section class="profile-sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="profileSheetTitle">
+        <div class="panel-head">
+          <div>
+            <h3 id="profileSheetTitle">Profiles</h3>
+            <p class="hint" id="profileHintText">Separate ledgers for you and family.</p>
+          </div>
+          <button class="ghost-button" type="button" id="closeProfileBtn">Close</button>
+        </div>
+
+        <div class="profile-active-card glass-lite" id="profileActiveCard"></div>
+        <div class="profile-list" id="profileList"></div>
+
+        <details class="profile-manage-details" id="profileManageDetails">
+          <summary>
+            <strong id="manageProfilesText">Manage Profiles</strong>
+            <span class="collapse-arrow" aria-hidden="true">⌄</span>
+          </summary>
+          <div class="profile-manage-body">
+            <div class="profile-add-row">
+              <input id="newProfileInput" type="text" maxlength="28" placeholder="New profile name" autocomplete="off" />
+              <button class="secondary-button compact-button" type="button" id="addProfileBtn">Add Profile</button>
+            </div>
+            <p class="hint profile-backup-note" id="allProfilesBackupText">Backups include all profiles.</p>
+            <div class="profile-manager-list" id="profileManagerList"></div>
+          </div>
+        </details>
+      </section>
+    </div>
+
     <div class="summary-sheet-backdrop" id="summaryBackdrop">
       <section class="summary-sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
         <div class="panel-head"><div><h3 id="summaryTitle">Summary</h3><p class="hint" id="summaryHint">Based on current History filters.</p></div><button class="ghost-button" type="button" id="closeSummaryBtn">Close</button></div>
@@ -544,6 +581,6 @@
 
     <div class="toast glass-strong" id="toast"></div>
   </div>
-  <script src="app.js?v=3.8.1"></script>
+  <script src="app.js?v=3.9.0"></script>
 </body>
 </html>

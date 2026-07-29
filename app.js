@@ -1,10 +1,12 @@
 
 "use strict";
 
-const APP_VERSION = "3.8.1";
+const APP_VERSION = "3.9.0";
 const RECORD_KEY = "dollarTracker.records.v3";
 const SETTINGS_KEY = "dollarTracker.settings.v3";
 const STATE_KEY = "dollarTracker.state.v3";
+const DEFAULT_PROFILE_ID = "profile-me";
+const MAX_PROFILES = 12;
 
 const LEGACY_RECORD_KEYS = [
   "wifeyMoneyRecords.liquid.v1",
@@ -40,7 +42,9 @@ const defaultSettings = {
   backupReminderDismissedAt: "",
   categories: [],
   categoryBudgets: {},
-  lastBackupRecordCount: 0
+  lastBackupRecordCount: 0,
+  profiles: [],
+  activeProfileId: ""
 };
 
 const currencyPresets = {
@@ -111,6 +115,34 @@ const I18N = {
   }
 };
 
+Object.assign(I18N.en, {
+  profiles: "Profiles", profile: "Profile", switchProfile: "Switch profile", manageProfiles: "Manage Profiles",
+  profileHint: "Separate ledgers for you and family.", currentProfile: "Current Profile", addProfile: "Add Profile",
+  newProfileName: "New profile name", profileName: "Profile name", saveProfile: "Save Profile", archiveProfile: "Archive",
+  restoreProfile: "Restore", deleteProfile: "Delete", choosePhoto: "Choose Photo", removePhoto: "Remove Photo",
+  profileAdded: "Profile added", profileUpdated: "Profile updated", profileArchived: "Profile archived", profileRestored: "Profile restored",
+  profileDeleted: "Profile deleted", switchedProfile: "Switched to {profile}", profileExists: "Profile already exists",
+  cannotDeleteLastProfile: "Keep at least one profile.", deleteProfileConfirm: "Delete this profile and its records? Export a backup first if you need them later.",
+  archiveProfileConfirm: "Archive this profile? Its records stay saved and can be restored later.", profilePhotoTooLarge: "Could not use this photo. Try a smaller image.",
+  allProfilesBackup: "Backups include all profiles.", backupProfilesLine: "Backup profiles: {count}", unknownProfile: "Unknown",
+  importPreviewProfiles: "Import backup?\n\nProfiles: {profiles}\nRecords: {records}\nExported: {date}\nVersion: {version}\n\nThis will replace current data in this browser.",
+  clearProfileRecords: "Clear All Records"
+});
+
+Object.assign(I18N.km, {
+  profiles: "ប្រវត្តិរូប", profile: "ប្រវត្តិរូប", switchProfile: "ប្តូរប្រវត្តិរូប", manageProfiles: "គ្រប់គ្រងប្រវត្តិរូប",
+  profileHint: "បញ្ជីដាច់ដោយឡែកសម្រាប់អ្នក និងគ្រួសារ។", currentProfile: "ប្រវត្តិរូបបច្ចុប្បន្ន", addProfile: "បន្ថែមប្រវត្តិរូប",
+  newProfileName: "ឈ្មោះប្រវត្តិរូបថ្មី", profileName: "ឈ្មោះប្រវត្តិរូប", saveProfile: "រក្សាទុក", archiveProfile: "លាក់ទុក",
+  restoreProfile: "ស្ដារ", deleteProfile: "លុប", choosePhoto: "ជ្រើសរូបថត", removePhoto: "លុបរូបថត",
+  profileAdded: "បានបន្ថែមប្រវត្តិរូប", profileUpdated: "បានរក្សាទុកប្រវត្តិរូប", profileArchived: "បានលាក់ទុក", profileRestored: "បានស្ដារ",
+  profileDeleted: "បានលុបប្រវត្តិរូប", switchedProfile: "បានប្តូរទៅ {profile}", profileExists: "មានឈ្មោះនេះរួចហើយ",
+  cannotDeleteLastProfile: "ត្រូវរក្សាទុកយ៉ាងហោចណាស់មួយ។", deleteProfileConfirm: "លុបប្រវត្តិរូបនេះ និងកំណត់ត្រារបស់វា? សូម Backup ជាមុនបើត្រូវការ។",
+  archiveProfileConfirm: "លាក់ទុកប្រវត្តិរូបនេះ? កំណត់ត្រានឹងនៅរក្សាទុក ហើយអាចស្ដារវិញបាន។", profilePhotoTooLarge: "មិនអាចប្រើរូបនេះបាន។ សូមសាកល្បងរូបតូចជាងនេះ។",
+  allProfilesBackup: "Backup រួមបញ្ចូលប្រវត្តិរូបទាំងអស់។", backupProfilesLine: "ប្រវត្តិរូបក្នុង Backup: {count}", unknownProfile: "មិនស្គាល់",
+  importPreviewProfiles: "នាំចូល Backup?\n\nប្រវត្តិរូប: {profiles}\nកំណត់ត្រា: {records}\nបាននាំចេញ: {date}\nកំណែ: {version}\n\nវានឹងជំនួសទិន្នន័យបច្ចុប្បន្នក្នុង Browser នេះ។",
+  clearProfileRecords: "លុបកំណត់ត្រាទាំងអស់"
+});
+
 let records = [];
 let settings = { ...defaultSettings };
 let activeFilter = "All";
@@ -127,6 +159,7 @@ let selectedRecordIds = new Set();
 let selectionMode = false;
 let activeSwipeCard = null;
 let quickAddState = { description: "Food", category: "food" };
+let profileSheetMode = "switch";
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -168,6 +201,144 @@ function normalizeCurrencyCode(value, fallback = "USD") {
   if (raw === "KHR" || raw === "៛" || raw === "RIEL") return "KHR";
   if (raw === "USD" || raw === "$") return "USD";
   return fallback === "KHR" ? "KHR" : "USD";
+}
+
+function profileInitials(name = "") {
+  const cleaned = String(name || "").trim();
+  if (!cleaned) return "?";
+  const parts = cleaned.split(/\s+/).filter(Boolean);
+  const initials = parts.length > 1
+    ? `${parts[0][0] || ""}${parts[1][0] || ""}`
+    : cleaned.slice(0, 2);
+  return initials.toUpperCase();
+}
+
+function makeProfileId(name = "profile") {
+  const base = String(name || "profile")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 28) || `profile-${Date.now()}`;
+  const taken = new Set((settings?.profiles || []).map(profile => profile.id));
+  if (!taken.has(base)) return base;
+  let index = 2;
+  while (taken.has(`${base}-${index}`)) index += 1;
+  return `${base}-${index}`;
+}
+
+function sanitizeProfileAvatar(value = "") {
+  const text = String(value || "");
+  if (!text.startsWith("data:image/")) return "";
+  return text.length <= 260000 ? text : "";
+}
+
+function normalizeBudgetMap(rawBudgets = {}, categories = defaultCategoryList()) {
+  const output = {};
+  const source = rawBudgets && typeof rawBudgets === "object" ? rawBudgets : {};
+  normalizeCategoryList(categories).forEach(category => {
+    const value = Number(source[category.id] || 0);
+    output[category.id] = Number.isFinite(value) && value > 0 ? Math.round(value * 100) / 100 : 0;
+  });
+  return output;
+}
+
+function makeDefaultProfile(seed = {}) {
+  const categories = normalizeCategoryList(seed.categories || defaultCategoryList());
+  return {
+    id: DEFAULT_PROFILE_ID,
+    name: "Me",
+    initials: "ME",
+    avatarDataUrl: "",
+    archived: false,
+    createdAt: new Date().toISOString(),
+    categories,
+    categoryBudgets: normalizeBudgetMap(seed.categoryBudgets, categories),
+    draft: null
+  };
+}
+
+function normalizeProfile(input = {}, usedIds = new Set(), seed = {}) {
+  const isDefault = input.id === DEFAULT_PROFILE_ID || usedIds.size === 0;
+  let id = String(input.id || (isDefault ? DEFAULT_PROFILE_ID : makeProfileId(input.name || "Profile"))).trim();
+  if (!id) id = isDefault ? DEFAULT_PROFILE_ID : `profile-${Date.now()}`;
+  id = id.replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 40) || DEFAULT_PROFILE_ID;
+  if (usedIds.has(id)) {
+    const base = id || "profile";
+    let index = 2;
+    while (usedIds.has(`${base}-${index}`)) index += 1;
+    id = `${base}-${index}`;
+  }
+  usedIds.add(id);
+
+  const name = String(input.name || seed.name || (id === DEFAULT_PROFILE_ID ? "Me" : "Profile")).trim().slice(0, 28) || "Profile";
+  const categories = normalizeCategoryList(input.categories || seed.categories || defaultCategoryList());
+  return {
+    id,
+    name,
+    initials: profileInitials(input.initials || name),
+    avatarDataUrl: sanitizeProfileAvatar(input.avatarDataUrl),
+    archived: Boolean(input.archived),
+    createdAt: input.createdAt || new Date().toISOString(),
+    categories,
+    categoryBudgets: normalizeBudgetMap(input.categoryBudgets || seed.categoryBudgets, categories),
+    draft: input.draft && typeof input.draft === "object" ? input.draft : null
+  };
+}
+
+function normalizeProfiles(input = [], seed = {}) {
+  const source = Array.isArray(input) && input.length ? input.slice(0, MAX_PROFILES) : [makeDefaultProfile(seed)];
+  const used = new Set();
+  let profiles = source.map(profile => normalizeProfile(profile, used, seed));
+  if (!profiles.length) profiles = [makeDefaultProfile(seed)];
+  if (!profiles.some(profile => !profile.archived)) profiles[0].archived = false;
+  return profiles.slice(0, MAX_PROFILES);
+}
+
+function activeProfile(includeArchived = false) {
+  const list = Array.isArray(settings.profiles) && settings.profiles.length ? settings.profiles : [makeDefaultProfile(settings)];
+  const found = list.find(profile => profile.id === settings.activeProfileId && (includeArchived || !profile.archived));
+  return found || list.find(profile => !profile.archived) || list[0];
+}
+
+function activeProfileId() {
+  return activeProfile(true)?.id || DEFAULT_PROFILE_ID;
+}
+
+function profileById(id) {
+  return (settings.profiles || []).find(profile => profile.id === id) || null;
+}
+
+function activeRecords() {
+  const id = activeProfileId();
+  return records.filter(record => (record.profileId || DEFAULT_PROFILE_ID) === id);
+}
+
+function saveActiveProfileLedger() {
+  if (!settings || !Array.isArray(settings.profiles)) return;
+  const profile = activeProfile(true);
+  if (!profile) return;
+  profile.categories = normalizeCategoryList(settings.categories);
+  profile.categoryBudgets = normalizeBudgetMap(settings.categoryBudgets, profile.categories);
+}
+
+function applyActiveProfileLedger() {
+  const profile = activeProfile();
+  settings.activeProfileId = profile.id;
+  settings.categories = normalizeCategoryList(profile.categories);
+  settings.categoryBudgets = normalizeBudgetMap(profile.categoryBudgets, settings.categories);
+}
+
+function profileDisplayName(id = activeProfileId()) {
+  return profileById(id)?.name || tr("unknownProfile");
+}
+
+function profileAvatarHTML(profile, className = "profile-avatar") {
+  const safeName = escapeHTML(profile?.name || "Profile");
+  if (profile?.avatarDataUrl) {
+    return `<span class="${className} has-photo"><img src="${profile.avatarDataUrl}" alt="${safeName}" /></span>`;
+  }
+  return `<span class="${className}">${escapeHTML(profile?.initials || profileInitials(profile?.name))}</span>`;
 }
 
 function uid() {
@@ -240,7 +411,7 @@ function categoryKey(category) {
 
 function resetCategoryRelatedData(allowedKeys = categoryKeys()) {
   const allowed = new Set(allowedKeys);
-  records.forEach(record => {
+  activeRecords().forEach(record => {
     if (!allowed.has(record.category)) record.category = "other";
   });
   const nextBudgets = {};
@@ -268,13 +439,16 @@ function sanitizeSettings(input = {}) {
   if (!["mono", "gold", "sky", "matcha", "sunset", "lavender", "christmas", "pink", "web", "symbiote", "blush", "ocean", "pearl"].includes(merged.themeTemplate)) merged.themeTemplate = "mono";
   if (!merged.appName || merged.appName === "Wifey Money") merged.appName = "DollarTracker";
 
-  merged.categories = normalizeCategoryList(merged.categories);
-  const rawBudgets = merged.categoryBudgets && typeof merged.categoryBudgets === "object" ? merged.categoryBudgets : {};
-  merged.categoryBudgets = {};
-  merged.categories.map(category => category.id).forEach(key => {
-    const value = Number(rawBudgets[key] || 0);
-    merged.categoryBudgets[key] = Number.isFinite(value) && value > 0 ? Math.round(value * 100) / 100 : 0;
-  });
+  const seedCategories = normalizeCategoryList(merged.categories);
+  const seedBudgets = normalizeBudgetMap(merged.categoryBudgets, seedCategories);
+  merged.profiles = normalizeProfiles(merged.profiles, { categories: seedCategories, categoryBudgets: seedBudgets });
+  if (!merged.profiles.some(profile => profile.id === merged.activeProfileId && !profile.archived)) {
+    merged.activeProfileId = merged.profiles.find(profile => !profile.archived)?.id || merged.profiles[0]?.id || DEFAULT_PROFILE_ID;
+  }
+
+  const active = merged.profiles.find(profile => profile.id === merged.activeProfileId) || merged.profiles[0];
+  merged.categories = normalizeCategoryList(active?.categories || seedCategories);
+  merged.categoryBudgets = normalizeBudgetMap(active?.categoryBudgets || seedBudgets, merged.categories);
 
   const backupRecordCount = Number(merged.lastBackupRecordCount || 0);
   merged.lastBackupRecordCount = Number.isFinite(backupRecordCount) && backupRecordCount > 0 ? Math.floor(backupRecordCount) : 0;
@@ -367,6 +541,15 @@ function categoryLabel(category) {
   return def.nameKey ? tr(def.nameKey) : def.name;
 }
 
+function categoryLabelForRecord(record) {
+  const profile = profileById(record?.profileId) || activeProfile(true);
+  const key = record?.category || "other";
+  const defs = normalizeCategoryList(profile?.categories || settings.categories);
+  const def = defs.find(item => item.id === key) || defs.find(item => item.id === "other");
+  if (!def) return tr("catOther");
+  return def.nameKey ? tr(def.nameKey) : def.name;
+}
+
 function quickDescriptionLabel(value) {
   return tr(`quick${value}`) || value;
 }
@@ -391,7 +574,7 @@ function renderQuickDescriptionChips() {
 
 function currentMonthRecords() {
   const month = todayISO().slice(0, 7);
-  return records.filter(record => (record.date || "").slice(0, 7) === month);
+  return activeRecords().filter(record => (record.date || "").slice(0, 7) === month);
 }
 
 
@@ -555,7 +738,7 @@ function removeCategory(id) {
   if (!categoryKeys().includes(id)) return;
   if (!confirm(tr("removeCategoryConfirm"))) return;
   settings.categories = categoryDefs().filter(category => category.id !== id);
-  records.forEach(record => {
+  activeRecords().forEach(record => {
     if (record.category === id) record.category = "other";
   });
   delete settings.categoryBudgets[id];
@@ -572,7 +755,7 @@ function resetCategories() {
   const defaults = defaultCategoryList();
   const defaultKeys = defaults.map(category => category.id);
   settings.categories = defaults;
-  records.forEach(record => {
+  activeRecords().forEach(record => {
     if (!defaultKeys.includes(record.category)) record.category = "other";
   });
   const nextBudgets = {};
@@ -688,8 +871,12 @@ function normalizeRecord(input) {
     ? numeric(input.originalAmount)
     : (normalizedOriginalCurrency === "KHR" ? amountUSD * safeRate : amountUSD);
 
+  const profileId = String(input.profileId || "").trim();
+  const normalizedProfileId = profileId && profileById(profileId) ? profileId : activeProfileId();
+
   return {
     id: input.id || uid(),
+    profileId: normalizedProfileId,
     type,
     amountUSD: Math.round(amountUSD * 10000) / 10000,
     originalAmount,
@@ -772,6 +959,10 @@ function loadState() {
   fromDate = state.fromDate || "";
   toDate = state.toDate || "";
   sortMode = state.sortMode || "newest";
+  if (state.activeProfileId && profileById(state.activeProfileId) && !profileById(state.activeProfileId).archived) {
+    settings.activeProfileId = state.activeProfileId;
+    applyActiveProfileLedger();
+  }
 }
 
 function loadData() {
@@ -787,6 +978,7 @@ function saveRecords() {
   // Legacy mirror keeps old imports safer, but clearEverything removes it too.
   safeSet("wifeyMoneyRecords.liquid.v1", records.map(r => ({
     id: r.id,
+    profileId: r.profileId || DEFAULT_PROFILE_ID,
     type: r.type,
     amount: r.amountUSD,
     amountUSD: r.amountUSD,
@@ -803,28 +995,38 @@ function saveRecords() {
 }
 
 function saveSettings() {
+  saveActiveProfileLedger();
   settings = sanitizeSettings(settings);
   safeSet(SETTINGS_KEY, settings);
   applyDocumentSettings();
 }
 
 function saveState() {
+  const draft = {
+    type: document.querySelector('input[name="type"]:checked')?.value || "Out",
+    amount: $("#amountInput")?.value || "",
+    description: $("#descriptionInput")?.value || "",
+    date: $("#dateInput")?.value || todayISO(),
+    note: $("#noteInput")?.value || "",
+    category: $("#categoryInput")?.value || "other"
+  };
+  const previousState = safeParse(STATE_KEY, null) || {};
+  const profileDrafts = { ...(previousState.profileDrafts || {}) };
+  profileDrafts[activeProfileId()] = draft;
+  const profile = activeProfile(true);
+  if (profile) profile.draft = draft;
+
   const state = {
     displayCurrency: settings.displayCurrency,
+    activeProfileId: activeProfileId(),
     activeFilter,
     searchTerm,
     fromDate,
     toDate,
     sortMode,
     activePage: $(".page.active")?.id?.replace("page-", "") || "home",
-    draft: {
-      type: document.querySelector('input[name="type"]:checked')?.value || "Out",
-      amount: $("#amountInput")?.value || "",
-      description: $("#descriptionInput")?.value || "",
-      date: $("#dateInput")?.value || todayISO(),
-      note: $("#noteInput")?.value || "",
-      category: $("#categoryInput")?.value || "other"
-    },
+    draft,
+    profileDrafts,
     savedAt: new Date().toISOString()
   };
   safeSet(STATE_KEY, state);
@@ -869,7 +1071,7 @@ function signedMoney(record) {
   return `${record.type === "In" ? "+" : "-"}${formatMoneyFromUSD(record.amountUSD)}`;
 }
 
-function totals(list = records) {
+function totals(list = activeRecords()) {
   const totalInUSD = list.filter(r => r.type === "In").reduce((sum, r) => sum + Number(r.amountUSD || 0), 0);
   const totalOutUSD = list.filter(r => r.type === "Out").reduce((sum, r) => sum + Number(r.amountUSD || 0), 0);
   return {
@@ -881,7 +1083,7 @@ function totals(list = records) {
   };
 }
 
-function sortedRecords(list = records) {
+function sortedRecords(list = activeRecords()) {
   return [...list].sort((a, b) => {
     if (sortMode === "oldest") return (new Date(a.date || 0) - new Date(b.date || 0)) || ((a.createdAt || 0) - (b.createdAt || 0));
     if (sortMode === "high") return Number(b.amountUSD || 0) - Number(a.amountUSD || 0);
@@ -891,7 +1093,7 @@ function sortedRecords(list = records) {
 }
 
 function filteredRecords() {
-  let list = [...records];
+  let list = [...activeRecords()];
   if (activeFilter !== "All") list = list.filter(r => r.type === activeFilter);
   if (fromDate) list = list.filter(r => (r.date || "") >= fromDate);
   if (toDate) list = list.filter(r => (r.date || "") <= toDate);
@@ -1105,12 +1307,258 @@ function translateUI() {
   setText("calculatorTitle", tr("calculator")); setText("calculatorHint", tr("calculatorHint")); setText("useCalcAmountBtn", tr("useAmount")); setText("quickAddTitle", tr("quickAdd")); setText("quickAddHint", tr("quickAddHint")); setText("quickAddTypeLabel", tr("type")); setText("quickAddOutLabel", tr("out")); setText("quickAddInLabel", tr("in")); setText("quickAddAmountLabel", tr("quickAddAmount")); setText("saveQuickAddBtn", tr("saveQuickAdd")); setText("openFullAddFromQuickBtn", tr("openFullAdd")); setText("closeQuickAddBtn", tr("close"));
   setText("summaryTitle", tr("summaryTitle")); setText("summaryHint", tr("summaryHint")); setText("closeSummaryBtn", tr("close")); setText("summaryInLabel", tr("totalIn")); setText("summaryOutLabel", tr("totalOut")); setText("summaryBalanceLabel", tr("balanceLeft")); setText("summaryInGraphLabel", tr("totalIn")); setText("summaryOutGraphLabel", tr("totalOut"));
   setText("clearSelectionBtn", tr("clearSelection"));
+  setText("profileSheetTitle", tr("profiles")); setText("profileHintText", tr("profileHint")); setText("closeProfileBtn", tr("close"));
+  setText("manageProfilesText", tr("manageProfiles")); setText("addProfileBtn", tr("addProfile")); setText("allProfilesBackupText", tr("allProfilesBackup"));
+  const profileInput = $("#newProfileInput"); if (profileInput) profileInput.placeholder = tr("newProfileName");
 }
 
 function renderLanguageButton() {
   const isKhmer = settings.language === "km";
   $("#languageCode").textContent = isKhmer ? "KH" : "EN";
   $("#languageFlag").src = isKhmer ? "flag-kh.png" : "flag-en.png";
+}
+
+function renderProfileButton() {
+  const profile = activeProfile();
+  const avatar = $("#activeProfileAvatar");
+  const name = $("#activeProfileName");
+  if (avatar) {
+    avatar.outerHTML = profile.avatarDataUrl
+      ? `<span id="activeProfileAvatar" class="profile-avatar has-photo"><img src="${profile.avatarDataUrl}" alt="${escapeHTML(profile.name)}" /></span>`
+      : `<span id="activeProfileAvatar" class="profile-avatar">${escapeHTML(profile.initials || profileInitials(profile.name))}</span>`;
+  }
+  if (name) name.textContent = profile.name;
+  const btn = $("#profileSwitchBtn");
+  if (btn) btn.setAttribute("aria-label", `${tr("switchProfile")}: ${profile.name}`);
+}
+
+function renderProfileSheet() {
+  const active = activeProfile();
+  const list = (settings.profiles || []).filter(profile => !profile.archived);
+  const archived = (settings.profiles || []).filter(profile => profile.archived);
+  const activeCard = $("#profileActiveCard");
+  if (activeCard) {
+    activeCard.innerHTML = `
+      ${profileAvatarHTML(active, "profile-avatar large")}
+      <div><span>${tr("currentProfile")}</span><strong>${escapeHTML(active.name)}</strong></div>
+    `;
+  }
+  const profileList = $("#profileList");
+  if (profileList) {
+    profileList.innerHTML = list.map(profile => `
+      <button class="profile-switch-row ${profile.id === active.id ? "active" : ""}" type="button" data-switch-profile="${escapeHTML(profile.id)}">
+        ${profileAvatarHTML(profile)}
+        <span>${escapeHTML(profile.name)}</span>
+        <strong>${profile.id === active.id ? "✓" : ""}</strong>
+      </button>
+    `).join("");
+  }
+  const manager = $("#profileManagerList");
+  if (manager) {
+    manager.innerHTML = [...list, ...archived].map(profile => {
+      const count = records.filter(record => record.profileId === profile.id).length;
+      return `
+        <article class="profile-manager-row ${profile.archived ? "archived" : ""}">
+          <div class="profile-manager-top">
+            ${profileAvatarHTML(profile)}
+            <div class="profile-manager-main">
+              <input type="text" maxlength="28" value="${escapeHTML(profile.name)}" data-profile-name="${escapeHTML(profile.id)}" aria-label="${tr("profileName")}" />
+              <small>${count} ${tr(count === 1 ? "record" : "records")}${profile.archived ? ` • ${tr("archiveProfile")}` : ""}</small>
+            </div>
+          </div>
+          <div class="profile-manager-actions">
+            <label class="secondary-button compact-button profile-photo-button">${tr("choosePhoto")}<input type="file" accept="image/*" data-profile-photo="${escapeHTML(profile.id)}" /></label>
+            <button class="secondary-button compact-button" type="button" data-save-profile="${escapeHTML(profile.id)}">${tr("save")}</button>
+            <button class="ghost-button compact-button" type="button" data-remove-profile-photo="${escapeHTML(profile.id)}">${tr("removePhoto")}</button>
+            ${profile.archived
+              ? `<button class="secondary-button compact-button" type="button" data-restore-profile="${escapeHTML(profile.id)}">${tr("restoreProfile")}</button>`
+              : `<button class="ghost-button compact-button" type="button" data-archive-profile="${escapeHTML(profile.id)}">${tr("archiveProfile")}</button>`}
+            <button class="danger-button compact-button" type="button" data-delete-profile="${escapeHTML(profile.id)}">${tr("deleteProfile")}</button>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+}
+
+function openProfileSheet() {
+  saveState();
+  renderProfileSheet();
+  $("#profileBackdrop")?.classList.add("show");
+  document.body.classList.add("modal-open");
+}
+
+function closeProfileSheet() {
+  $("#profileBackdrop")?.classList.remove("show");
+  document.body.classList.remove("modal-open");
+}
+
+function switchProfile(id) {
+  const target = profileById(id);
+  if (!target || target.archived || target.id === activeProfileId()) {
+    closeProfileSheet();
+    return;
+  }
+  saveState();
+  saveActiveProfileLedger();
+  settings.activeProfileId = target.id;
+  applyActiveProfileLedger();
+  resetHistorySelectionState();
+  closeOtherSwipeCards(null);
+  closeProfileSheet();
+  restoreDraft();
+  saveSettings();
+  saveState();
+  render({ translate: true });
+  showToast(tr("switchedProfile", { profile: target.name }));
+}
+
+function profileNameExists(name, exceptId = "") {
+  const target = String(name || "").trim().toLowerCase();
+  if (!target) return false;
+  return (settings.profiles || []).some(profile => profile.id !== exceptId && profile.name.trim().toLowerCase() === target);
+}
+
+function addProfile() {
+  const input = $("#newProfileInput");
+  const name = String(input?.value || "").trim().slice(0, 28);
+  if (!name) return;
+  if (profileNameExists(name)) {
+    showToast(tr("profileExists"));
+    return;
+  }
+  if ((settings.profiles || []).length >= MAX_PROFILES) return;
+  saveActiveProfileLedger();
+  const id = makeProfileId(`profile-${name}`);
+  settings.profiles.push(normalizeProfile({ id, name, categories: defaultCategoryList(), categoryBudgets: {} }, new Set(settings.profiles.map(p => p.id))));
+  if (input) input.value = "";
+  saveSettings();
+  renderProfileSheet();
+  renderProfileButton();
+  showToast(tr("profileAdded"));
+}
+
+function saveProfile(id) {
+  const profile = profileById(id);
+  const input = document.querySelector(`[data-profile-name="${CSS.escape(id)}"]`);
+  const name = String(input?.value || "").trim().slice(0, 28);
+  if (!profile || !name) return;
+  if (profileNameExists(name, id)) {
+    showToast(tr("profileExists"));
+    return;
+  }
+  profile.name = name;
+  profile.initials = profileInitials(name);
+  saveSettings();
+  renderProfileSheet();
+  renderProfileButton();
+  showToast(tr("profileUpdated"));
+}
+
+function archiveProfile(id) {
+  saveActiveProfileLedger();
+  const profile = profileById(id);
+  if (!profile) return;
+  const activeProfiles = settings.profiles.filter(item => !item.archived);
+  if (activeProfiles.length <= 1) {
+    showToast(tr("cannotDeleteLastProfile"));
+    return;
+  }
+  if (!confirm(tr("archiveProfileConfirm"))) return;
+  profile.archived = true;
+  if (settings.activeProfileId === id) {
+    settings.activeProfileId = settings.profiles.find(item => !item.archived && item.id !== id)?.id || DEFAULT_PROFILE_ID;
+    applyActiveProfileLedger();
+  }
+  saveSettings();
+  resetHistorySelectionState();
+  render({ translate: true });
+  renderProfileSheet();
+  showToast(tr("profileArchived"));
+}
+
+function restoreProfile(id) {
+  const profile = profileById(id);
+  if (!profile) return;
+  profile.archived = false;
+  saveSettings();
+  renderProfileSheet();
+  showToast(tr("profileRestored"));
+}
+
+function deleteProfile(id) {
+  saveActiveProfileLedger();
+  const profile = profileById(id);
+  if (!profile) return;
+  const remainingActive = settings.profiles.filter(item => item.id !== id && !item.archived).length;
+  if (settings.profiles.length <= 1 || (!profile.archived && remainingActive < 1)) {
+    showToast(tr("cannotDeleteLastProfile"));
+    return;
+  }
+  if (!confirm(tr("deleteProfileConfirm"))) return;
+  records = records.filter(record => record.profileId !== id);
+  settings.profiles = settings.profiles.filter(item => item.id !== id);
+  if (!profileById(settings.activeProfileId)) {
+    settings.activeProfileId = settings.profiles.find(item => !item.archived)?.id || settings.profiles[0]?.id || DEFAULT_PROFILE_ID;
+    applyActiveProfileLedger();
+  }
+  saveRecords();
+  saveSettings();
+  resetHistorySelectionState();
+  render({ translate: true });
+  renderProfileSheet();
+  showToast(tr("profileDeleted"));
+}
+
+function removeProfilePhoto(id) {
+  const profile = profileById(id);
+  if (!profile) return;
+  profile.avatarDataUrl = "";
+  saveSettings();
+  renderProfileSheet();
+  renderProfileButton();
+}
+
+function resizeProfilePhoto(file, callback) {
+  if (!file || !file.type?.startsWith("image/")) return;
+  const reader = new FileReader();
+  reader.onerror = () => showToast(tr("profilePhotoTooLarge"));
+  reader.onload = () => {
+    const img = new Image();
+    img.onerror = () => showToast(tr("profilePhotoTooLarge"));
+    img.onload = () => {
+      try {
+        const size = 192;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        const min = Math.min(img.naturalWidth || img.width, img.naturalHeight || img.height);
+        const sx = Math.max(0, ((img.naturalWidth || img.width) - min) / 2);
+        const sy = Math.max(0, ((img.naturalHeight || img.height) - min) / 2);
+        ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+        if (dataUrl.length > 260000) throw new Error("too large");
+        callback(dataUrl);
+      } catch {
+        showToast(tr("profilePhotoTooLarge"));
+      }
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function setProfilePhoto(id, file) {
+  const profile = profileById(id);
+  if (!profile) return;
+  resizeProfilePhoto(file, dataUrl => {
+    profile.avatarDataUrl = dataUrl;
+    saveSettings();
+    renderProfileSheet();
+    renderProfileButton();
+    showToast(tr("profileUpdated"));
+  });
 }
 
 function showToast(message) {
@@ -1517,7 +1965,7 @@ function updateCurrencySwitchPill() {
 }
 
 function renderHome(options = {}) {
-  const total = totals(records);
+  const total = totals();
   const homeBalanceEl = $("#homeBalance");
 
   if (typeof options.animateBalanceFrom === "number" && options.animateBalanceFrom !== total.balanceUSD) {
@@ -1543,7 +1991,7 @@ function renderHome(options = {}) {
 
   renderBudgetProgress();
   renderCategoryChart();
-  renderRecordList($("#recentList"), sortedRecords(records).slice(0, 4), true);
+  renderRecordList($("#recentList"), sortedRecords().slice(0, 4), true);
   renderBackupReminder();
 }
 
@@ -1610,6 +2058,8 @@ function renderSettingsPage() {
 
 function renderSharedPolish() {
   renderLanguageButton();
+  renderProfileButton();
+  if ($("#profileBackdrop")?.classList.contains("show")) renderProfileSheet();
   $$(".currency-card-btn").forEach(button => button.classList.toggle("active", button.dataset.currency === settings.displayCurrency));
   updateSegmentedPills();
   updateCurrencySwitchPill();
@@ -1644,12 +2094,13 @@ function addRecord(event) {
     return;
   }
 
-  const previousBalanceUSD = totals(records).balanceUSD;
+  const previousBalanceUSD = totals().balanceUSD;
   const type = new FormData(event.currentTarget).get("type");
   const amountUSD = displayToUsd(rawAmount, settings.displayCurrency);
 
   records.push({
     id: uid(),
+    profileId: activeProfileId(),
     type,
     amountUSD: Math.round(amountUSD * 10000) / 10000,
     originalAmount: rawAmount,
@@ -1906,12 +2357,13 @@ function saveQuickAddRecord(event) {
     return;
   }
 
-  const previousBalanceUSD = totals(records).balanceUSD;
+  const previousBalanceUSD = totals().balanceUSD;
   const type = new FormData(event.currentTarget).get("quickAddType") === "In" ? "In" : "Out";
   const amountUSD = displayToUsd(rawAmount, settings.displayCurrency);
 
   records.push({
     id: uid(),
+    profileId: activeProfileId(),
     type,
     amountUSD: Math.round(amountUSD * 10000) / 10000,
     originalAmount: rawAmount,
@@ -1971,6 +2423,8 @@ function dismissBackupReminder() {
 }
 
 function exportBackup() {
+  saveState();
+  saveSettings();
   const data = { app: "DollarTracker", version: APP_VERSION, exportedAt: new Date().toISOString(), settings, records };
   downloadFile(`dollartracker-backup-${todayISO()}.json`, JSON.stringify(data, null, 2), "application/json");
   settings.lastBackupAt = new Date().toISOString();
@@ -1982,11 +2436,11 @@ function exportBackup() {
 }
 
 function exportCSV() {
-  const header = ["Date","Description","Category","Type","Amount USD","Amount KHR","Net USD","Net KHR","Original Amount","Original Currency","Rate At Entry","Note"];
-  const rows = sortedRecords(records).map(r => {
+  const header = ["Profile","Date","Description","Category","Type","Amount USD","Amount KHR","Net USD","Net KHR","Original Amount","Original Currency","Rate At Entry","Note"];
+  const rows = [...records].sort((a, b) => (new Date(b.date || 0) - new Date(a.date || 0)) || ((b.createdAt || 0) - (a.createdAt || 0))).map(r => {
     const sign = r.type === "In" ? 1 : -1;
     const amountKHR = usdToDisplay(r.amountUSD, "KHR");
-    return [r.date || "", r.description || "", categoryLabel(r.category), r.type, Number(r.amountUSD || 0).toFixed(2), Math.round(amountKHR), (sign * Number(r.amountUSD || 0)).toFixed(2), Math.round(sign * amountKHR), r.originalAmount ?? "", r.originalCurrency ?? "", r.exchangeRateAtEntry ?? "", r.note || ""];
+    return [profileDisplayName(r.profileId), r.date || "", r.description || "", categoryLabelForRecord(r), r.type, Number(r.amountUSD || 0).toFixed(2), Math.round(amountKHR), (sign * Number(r.amountUSD || 0)).toFixed(2), Math.round(sign * amountKHR), r.originalAmount ?? "", r.originalCurrency ?? "", r.exchangeRateAtEntry ?? "", r.note || ""];
   });
   const csv = [header, ...rows].map(row => row.map(cell => `"${String(cell).replaceAll('"','""')}"`).join(",")).join("\n");
   downloadFile(`dollartracker-records-${todayISO()}.csv`, csv, "text/csv");
@@ -2142,8 +2596,10 @@ function saveEditedRecord(event) {
 function backupPreviewText(data, normalizedRecords) {
   const exportedAt = data?.exportedAt ? displayDateTime(data.exportedAt) : tr("never");
   const version = data?.version || "Unknown";
-  return tr("importPreview", {
-    count: normalizedRecords.length,
+  const profileCount = Array.isArray(data?.settings?.profiles) && data.settings.profiles.length ? data.settings.profiles.length : 1;
+  return tr("importPreviewProfiles", {
+    profiles: profileCount,
+    records: normalizedRecords.length,
     date: exportedAt,
     version
   });
@@ -2160,7 +2616,7 @@ function importBackup(file) {
       const previewRecords = importedRecords.map(item => item && typeof item === "object" ? item : null).filter(Boolean);
       if (!confirm(backupPreviewText(data, previewRecords))) return;
 
-      if (data.settings) settings = sanitizeSettings({ ...settings, ...data.settings });
+      settings = sanitizeSettings(data.settings ? { ...defaultSettings, ...data.settings } : { ...defaultSettings });
       records = importedRecords.map(normalizeRecord).filter(Boolean);
       resetHistorySelectionState();
       settings.lastBackupRecordCount = records.length;
@@ -2276,7 +2732,7 @@ function finishClearEverything() {
 
 function restoreDraft() {
   const state = safeParse(STATE_KEY, null);
-  const draft = state?.draft;
+  const draft = state?.profileDrafts?.[activeProfileId()] || activeProfile(true)?.draft || (state?.activeProfileId === activeProfileId() ? state?.draft : null);
 
   if (!draft) {
     $("#dateInput").value = todayISO();
@@ -2385,6 +2841,34 @@ function initEvents() {
   }));
 
   $("#languageToggle").addEventListener("click", switchLanguageSmooth);
+  $("#profileSwitchBtn")?.addEventListener("click", openProfileSheet);
+  $("#closeProfileBtn")?.addEventListener("click", closeProfileSheet);
+  $("#profileBackdrop")?.addEventListener("click", event => { if (event.target.id === "profileBackdrop") closeProfileSheet(); });
+  $("#profileList")?.addEventListener("click", event => {
+    const button = event.target.closest("[data-switch-profile]");
+    if (button) switchProfile(button.dataset.switchProfile);
+  });
+  $("#addProfileBtn")?.addEventListener("click", addProfile);
+  $("#newProfileInput")?.addEventListener("keydown", event => {
+    if (event.key === "Enter") { event.preventDefault(); addProfile(); }
+  });
+  $("#profileManagerList")?.addEventListener("click", event => {
+    const saveBtn = event.target.closest("[data-save-profile]");
+    const archiveBtn = event.target.closest("[data-archive-profile]");
+    const restoreBtn = event.target.closest("[data-restore-profile]");
+    const deleteBtn = event.target.closest("[data-delete-profile]");
+    const removePhotoBtn = event.target.closest("[data-remove-profile-photo]");
+    if (saveBtn) saveProfile(saveBtn.dataset.saveProfile);
+    if (archiveBtn) archiveProfile(archiveBtn.dataset.archiveProfile);
+    if (restoreBtn) restoreProfile(restoreBtn.dataset.restoreProfile);
+    if (deleteBtn) deleteProfile(deleteBtn.dataset.deleteProfile);
+    if (removePhotoBtn) removeProfilePhoto(removePhotoBtn.dataset.removeProfilePhoto);
+  });
+  $("#profileManagerList")?.addEventListener("change", event => {
+    const input = event.target.closest("[data-profile-photo]");
+    if (input?.files?.[0]) setProfilePhoto(input.dataset.profilePhoto, input.files[0]);
+    if (input) input.value = "";
+  });
 
   $("#transactionForm").addEventListener("submit", addRecord);
   $("#openQuickAddBtn")?.addEventListener("click", () => openQuickAdd(document.querySelector('input[name="type"]:checked')?.value || "Out"));

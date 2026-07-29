@@ -1426,3 +1426,38 @@ html[data-theme=light] .record-card.record-selected .record-card-body{
     box-shadow:0 10px 22px rgba(0,0,0,.08), inset 0 0 0 1px var(--line-strong);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   20. PROFILE MANAGER — v3.9.0 family ledgers
+--------------------------------------------------------------------------- */
+.topbar-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;min-width:0}
+.profile-switch-button{height:46px;min-width:92px;max-width:128px;border-radius:999px;border:1px solid var(--line);color:var(--text);display:inline-flex;align-items:center;justify-content:flex-start;gap:8px;padding:6px 10px;font-weight:900;overflow:hidden}
+.profile-name-small{font-size:12px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:64px}
+.profile-avatar{width:30px;height:30px;min-width:30px;border-radius:999px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,var(--accent-1),var(--accent-2));color:var(--on-accent);font-size:11px;font-weight:900;letter-spacing:-.04em;text-transform:uppercase;box-shadow:inset 0 1px 0 rgba(255,255,255,.26)}
+.profile-avatar.large{width:54px;height:54px;min-width:54px;font-size:17px;border-radius:22px}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-sheet-backdrop{position:fixed;inset:0;display:none;visibility:hidden;opacity:0;pointer-events:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.40);padding:16px;padding-bottom:calc(16px + var(--safe-bottom));transition:opacity .2s ease;z-index:64}
+.profile-sheet-backdrop.show{display:flex;visibility:visible;opacity:1;pointer-events:auto}
+.profile-sheet{display:block;width:min(100%,448px);max-height:min(86svh,760px);overflow-y:auto;border-radius:30px;padding:18px;margin:0;animation:sheetIn .24s cubic-bezier(.22,1,.36,1) both}
+.profile-active-card{display:flex;align-items:center;gap:12px;border-radius:24px;padding:12px;margin-bottom:12px}
+.profile-active-card span:not(.profile-avatar){display:block;color:var(--muted);font-size:12px;font-weight:800;margin-bottom:3px}
+.profile-active-card strong{font-size:20px;letter-spacing:-.04em}
+.profile-list{display:grid;gap:8px;margin-bottom:12px}
+.profile-switch-row{width:100%;border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--text);padding:11px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;font-weight:900}
+.profile-switch-row span:not(.profile-avatar){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-switch-row strong{color:var(--accent-2);font-size:18px}
+.profile-switch-row.active{background:linear-gradient(155deg,var(--surface-2),var(--surface));border-color:var(--line-strong)}
+.profile-manage-details{border:1px solid var(--line);border-radius:24px;background:var(--surface);overflow:hidden}
+.profile-manage-details summary{list-style:none;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;cursor:pointer;padding:14px 16px}
+.profile-manage-details summary::-webkit-details-marker{display:none}
+.profile-manage-details[open] .collapse-arrow{transform:rotate(180deg)}
+.profile-manage-body{display:grid;gap:12px;padding:0 14px 14px}
+.profile-add-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.profile-backup-note{margin:0!important}
+.profile-manager-list{display:grid;gap:10px}
+.profile-manager-row{border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.06);padding:12px;display:grid;gap:10px}
+.profile-manager-row.archived{opacity:.72}
+.profile-manager-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center}
+.profile-manager-main{min-width:0}.profile-manager-main input{min-height:46px;border-radius:16px}.profile-manager-main small{display:block;margin-top:5px;color:var(--muted);font-weight:800;font-size:12px}
+.profile-manager-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.profile-manager-actions .danger-button{min-height:46px;padding:11px 12px}.profile-photo-button{position:relative;text-align:center;overflow:hidden}.profile-photo-button input{display:none}
+@media (max-width:370px){.topbar-actions{gap:6px}.profile-switch-button{min-width:74px;max-width:94px;padding:6px 8px}.profile-name-small{display:none}.profile-manager-actions{grid-template-columns:1fr}.profile-add-row{grid-template-columns:1fr}.profile-sheet{padding:14px}}
