@@ -1768,7 +1768,7 @@ html[data-theme=light] select{
 }
 
 /* ===========================================================================
-   v3.9.5 — Final Stability + iOS Picker Polish
+   v3.9.7 — Final Stability + iOS Picker Polish
 =========================================================================== */
 select{
   min-height:54px!important;
@@ -1815,3 +1815,228 @@ html[data-theme=light] .choice-option.active{background:linear-gradient(135deg,r
 .ios-calc-grid button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .ios-calc-grid button:active{transform:scale(.94)}
 .ios-calc-grid .calc-operator-key.active{background:var(--surface-2);color:var(--accent-1);box-shadow:inset 0 0 0 2px var(--accent-1)}
+
+/* ===========================================================================
+   v3.9.7 — iPhone Thermal + GPU Optimization
+   Keep the same visual language while removing continuous GPU-heavy work on
+   touch devices. Static translucent layers replace stacked live backdrop blurs.
+=========================================================================== */
+html.thermal-lite .orb{
+  animation:none!important;
+  filter:blur(34px)!important;
+  will-change:auto!important;
+  transform:none!important;
+  opacity:.68;
+}
+html.thermal-lite .pulse{animation:none!important;box-shadow:0 0 0 5px rgba(255,255,255,.08)}
+html.thermal-lite .balance-hero:after{filter:blur(38px)!important;opacity:.14!important}
+
+html.thermal-lite .glass,
+html.thermal-lite .glass-strong,
+html.thermal-lite .glass-lite,
+html.thermal-lite .quick-card{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+html.thermal-lite .topbar,
+html.thermal-lite .bottom-nav{
+  backdrop-filter:blur(12px) saturate(135%)!important;
+  -webkit-backdrop-filter:blur(12px) saturate(135%)!important;
+}
+
+html.thermal-lite .profile-sheet-backdrop,
+html.thermal-lite .choice-sheet-backdrop,
+html.thermal-lite .summary-sheet-backdrop,
+html.thermal-lite .edit-sheet-backdrop,
+html.thermal-lite .calculator-backdrop,
+html.thermal-lite .filter-sheet-backdrop,
+html.thermal-lite .quick-add-backdrop{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  background:rgba(0,0,0,.46)!important;
+}
+
+html.thermal-lite .page.active,
+html.thermal-lite .profile-sheet,
+html.thermal-lite .choice-sheet,
+html.thermal-lite .summary-sheet,
+html.thermal-lite .edit-sheet,
+html.thermal-lite .calculator-sheet,
+html.thermal-lite .filter-sheet,
+html.thermal-lite .quick-add-sheet,
+html.thermal-lite .selection-summary-bar{
+  filter:none!important;
+}
+
+html.thermal-lite .record-card{
+  animation:none!important;
+  transform:none!important;
+  contain:layout paint style;
+}
+html.thermal-lite .record-card-body{will-change:auto!important}
+html.thermal-lite .record-list{content-visibility:visible!important;contain:none!important}
+html.thermal-lite .theme-signature{filter:none!important;will-change:auto!important}
+html.thermal-lite .balance-bump{animation:none!important}
+
+html.app-backgrounded *,
+html.app-backgrounded *::before,
+html.app-backgrounded *::after{
+  animation-play-state:paused!important;
+  transition:none!important;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .orb,.pulse{animation:none!important}
+  .page.active,.record-card,.selection-summary-bar{animation:none!important}
+}
+
+/* ===========================================================================
+   v3.9.7 — Ultimate Safari Thermal Pass + Flat Swipe Action Seam
+   iPhone/Safari receives static glass surfaces and no continuous paint work.
+   The record body moves cleanly over a rectangular action tray; individual
+   action buttons no longer create pill-shaped seams.
+=========================================================================== */
+.record-card.swipe-open,
+.record-card.swipe-dragging{
+  overflow:hidden!important;
+  border-radius:22px!important;
+}
+.record-card.swipe-open .record-card-body,
+.record-card.swipe-dragging .record-card-body{
+  border-top-right-radius:0!important;
+  border-bottom-right-radius:0!important;
+  box-shadow:6px 0 14px rgba(0,0,0,.14)!important;
+  overflow:hidden!important;
+}
+.record-card.swipe-open .record-swipe-actions,
+.record-card.swipe-dragging .record-swipe-actions{
+  border-radius:0!important;
+  overflow:hidden!important;
+  background:transparent!important;
+}
+.swipe-edit-btn,
+.swipe-delete-btn,
+.swipe-edit-btn:first-child,
+.swipe-delete-btn:last-child{
+  border-radius:0!important;
+}
+.record-card.swipe-open .swipe-edit-btn,
+.record-card.swipe-dragging .swipe-edit-btn,
+.record-card.swipe-open .swipe-delete-btn,
+.record-card.swipe-dragging .swipe-delete-btn{
+  clip-path:none!important;
+}
+
+html.thermal-lite .aurora-bg,
+html.thermal-lite .orb{
+  display:none!important;
+}
+html.thermal-lite body{
+  background:
+    linear-gradient(160deg, var(--bg), var(--bg2))!important;
+}
+html.thermal-lite .balance-hero:after,
+html.thermal-lite .balance-hero:before,
+html.thermal-lite .theme-signature{
+  filter:none!important;
+  will-change:auto!important;
+}
+html.thermal-lite .balance-hero:after{
+  display:none!important;
+}
+html.thermal-lite .glass,
+html.thermal-lite .glass-strong,
+html.thermal-lite .glass-lite,
+html.thermal-lite .quick-card,
+html.thermal-lite .topbar,
+html.thermal-lite .bottom-nav,
+html.thermal-lite .profile-sheet,
+html.thermal-lite .choice-sheet,
+html.thermal-lite .summary-sheet,
+html.thermal-lite .edit-sheet,
+html.thermal-lite .calculator-sheet,
+html.thermal-lite .filter-sheet,
+html.thermal-lite .quick-add-sheet,
+html.thermal-lite .selection-summary-bar{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.14)!important;
+}
+html.thermal-lite[data-theme=light] .glass,
+html.thermal-lite[data-theme=light] .glass-strong,
+html.thermal-lite[data-theme=light] .glass-lite,
+html.thermal-lite[data-theme=light] .quick-card,
+html.thermal-lite[data-theme=light] .topbar,
+html.thermal-lite[data-theme=light] .bottom-nav,
+html.thermal-lite[data-theme=light] .profile-sheet,
+html.thermal-lite[data-theme=light] .choice-sheet,
+html.thermal-lite[data-theme=light] .summary-sheet,
+html.thermal-lite[data-theme=light] .edit-sheet,
+html.thermal-lite[data-theme=light] .calculator-sheet,
+html.thermal-lite[data-theme=light] .filter-sheet,
+html.thermal-lite[data-theme=light] .quick-add-sheet,
+html.thermal-lite[data-theme=light] .selection-summary-bar{
+  box-shadow:0 8px 22px rgba(25,30,35,.09), inset 0 1px 0 rgba(255,255,255,.76)!important;
+}
+html.thermal-lite .topbar,
+html.thermal-lite .bottom-nav{
+  background:linear-gradient(155deg, color-mix(in srgb,var(--surface-2) 78%,var(--bg) 22%), color-mix(in srgb,var(--surface) 80%,var(--bg2) 20%))!important;
+}
+html.thermal-lite .record-card{
+  contain:layout style paint!important;
+  transform:none!important;
+  animation:none!important;
+  box-shadow:0 4px 14px rgba(0,0,0,.10)!important;
+}
+html.thermal-lite .record-card-body{
+  will-change:auto!important;
+  backface-visibility:visible!important;
+  -webkit-backface-visibility:visible!important;
+}
+html.thermal-lite .record-swipe-actions{
+  will-change:auto!important;
+  transition:opacity .10s linear!important;
+}
+html.thermal-lite .record-card.swipe-open .record-card-body,
+html.thermal-lite .record-card.swipe-dragging .record-card-body{
+  box-shadow:4px 0 10px rgba(0,0,0,.12)!important;
+}
+html.thermal-lite .page.active,
+html.thermal-lite .record-card,
+html.thermal-lite .profile-sheet,
+html.thermal-lite .choice-sheet,
+html.thermal-lite .summary-sheet,
+html.thermal-lite .edit-sheet,
+html.thermal-lite .calculator-sheet,
+html.thermal-lite .filter-sheet,
+html.thermal-lite .quick-add-sheet,
+html.thermal-lite .selection-summary-bar{
+  filter:none!important;
+  animation:none!important;
+}
+html.thermal-lite .record-list,
+html.thermal-lite .category-chart-list,
+html.thermal-lite .budget-list{
+  contain:layout style!important;
+}
+html.thermal-lite .choice-sheet-backdrop,
+html.thermal-lite .profile-sheet-backdrop,
+html.thermal-lite .summary-sheet-backdrop,
+html.thermal-lite .edit-sheet-backdrop,
+html.thermal-lite .calculator-backdrop,
+html.thermal-lite .filter-sheet-backdrop,
+html.thermal-lite .quick-add-backdrop{
+  background:rgba(0,0,0,.38)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+html.thermal-lite[data-theme=light] .choice-sheet-backdrop,
+html.thermal-lite[data-theme=light] .profile-sheet-backdrop,
+html.thermal-lite[data-theme=light] .summary-sheet-backdrop,
+html.thermal-lite[data-theme=light] .edit-sheet-backdrop,
+html.thermal-lite[data-theme=light] .calculator-backdrop,
+html.thermal-lite[data-theme=light] .filter-sheet-backdrop,
+html.thermal-lite[data-theme=light] .quick-add-backdrop{
+  background:rgba(20,24,30,.16)!important;
+}

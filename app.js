@@ -1,7 +1,7 @@
 
 "use strict";
 
-const APP_VERSION = "3.9.5";
+const APP_VERSION = "3.9.7";
 const RECORD_KEY = "dollarTracker.records.v3";
 const SETTINGS_KEY = "dollarTracker.settings.v3";
 const STATE_KEY = "dollarTracker.state.v3";
@@ -2102,7 +2102,9 @@ function updateFloatingSaveButton() {
 }
 
 function isReducedMotion() {
-  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || false;
+  return document.documentElement.classList.contains("thermal-lite")
+    || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    || false;
 }
 
 function easeOutCubic(t) {
@@ -3671,9 +3673,10 @@ function initEvents() {
   window.addEventListener("pagehide", persistAll);
   window.addEventListener("beforeunload", persistAll);
   document.addEventListener("visibilitychange", () => {
+    document.documentElement.classList.toggle("app-backgrounded", document.visibilityState !== "visible");
     if (document.visibilityState === "hidden") persistAll();
   });
-  window.addEventListener("resize", updateNavPill);
+  window.addEventListener("resize", () => { applyDevicePerformanceMode(); updateNavPill(); });
 }
 
 function notifyAppUpdateReady() {
@@ -3700,7 +3703,18 @@ function registerServiceWorker() {
   }).catch(() => {});
 }
 
+function applyDevicePerformanceMode() {
+  const coarse = window.matchMedia?.("(hover: none) and (pointer: coarse)")?.matches;
+  const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const narrow = Math.min(window.innerWidth || 9999, window.screen?.width || 9999) <= 520;
+
+  document.documentElement.classList.toggle("thermal-lite", Boolean(isiOS || (coarse && narrow)));
+  document.documentElement.classList.toggle("app-backgrounded", document.visibilityState !== "visible");
+}
+
 function boot() {
+  applyDevicePerformanceMode();
   loadData();
   restoreDraft();
   initEvents();

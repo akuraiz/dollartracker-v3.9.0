@@ -447,7 +447,7 @@ No storage schema change. No money logic changes beyond preserving historical KH
 - Kept records, backup format, profile storage, and money-history logic unchanged.
 
 
-## v3.9.5 Final Stability + iOS Picker Polish
+## v3.9.7 Final Stability + iOS Picker Polish
 
 - Replaced the remaining native select/dropdown opening behavior with a shared iOS-style choice sheet for Add category, Edit category, Edit currency, and History sort.
 - Kept the closed dropdown fields visually calm and close to the older clean style, without the jumpy focus movement.
@@ -458,3 +458,12 @@ No storage schema change. No money logic changes beyond preserving historical KH
 - Replaced the record-count-only backup reminder trigger with a backup change counter that tracks real app changes and resets after a successful backup export.
 - Added clearer localStorage failure warning behavior so save failures are not silent.
 - Kept the History swipe action seam rounded and polished without changing record or profile storage schemas.
+
+## v3.9.7 Ultimate Safari Thermal Patch
+
+- Removed the pill-shaped swipe-action seam: the record body now slides over a flat Edit/Delete tray, and individual action buttons no longer carry their own rounded corners.
+- Strengthened iPhone/Safari thermal mode by removing continuous aurora/orb paint work entirely on touch devices.
+- Removed live backdrop blur from top/bottom bars and modal sheets in thermal mode, replacing it with static layered surfaces.
+- Disabled the large blurred balance glow on thermal-lite devices.
+- Reduced card and sheet shadow cost on iPhone while keeping the same clean rounded layout.
+- Kept storage, profiles, backups, calculator logic, money math, and data schema unchanged.
