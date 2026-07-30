@@ -508,3 +508,9 @@ No storage schema change. No money logic changes beyond preserving historical KH
 - Removed the iOS Safari grey inner control from the amount input by forcing the inner number field transparent and moving focus styling to the outer amount wrapper.
 - Improved the floating Save Record button for Safari/Add-to-Home-Screen PWAs by using `visualViewport` top positioning when the keyboard is visible.
 - Keeps the balanced liquid-glass theme from v3.9.11/v3.9.12.
+
+
+## v3.9.14 Signature Glow Restoration
+
+- Restored the unique signature glows on the balance card for Frost Pine, Web, Pink, Symbiote, Blush Pop, Ocean, and Pearl.
+- Brought back the center glow on the balance card, including the Christmas warm glow, with a lighter blur cost for Safari/iPhone thermal mode.

@@ -2502,3 +2502,71 @@ body.floating-save-ready html.keyboard-open .floating-save-button{
   visibility:visible;
   pointer-events:auto;
 }
+
+
+/* ===========================================================================
+   v3.9.14 — Restore signature glows with lighter Safari cost
+   Bring back the unique theme identity glows on the balance card without
+   returning to the older heavy continuous effects.
+=========================================================================== */
+/* restore signature artwork glow even on phone / thermal-lite */
+html[data-template=pink] .theme-signature,
+html[data-template=christmas] .theme-signature,
+html[data-template=web] .theme-signature,
+html[data-template=symbiote] .theme-signature,
+html[data-template=blush] .theme-signature,
+html[data-template=ocean] .theme-signature,
+html[data-template=pearl] .theme-signature{
+  opacity:1 !important;
+}
+html[data-template=pink] .theme-signature{filter:drop-shadow(0 10px 16px rgba(255,154,198,.24)) !important;}
+html[data-template=christmas] .theme-signature{filter:drop-shadow(0 10px 18px rgba(255,223,168,.26)) !important;}
+html[data-template=web] .theme-signature{filter:drop-shadow(0 12px 18px rgba(220,76,98,.24)) !important;}
+html[data-template=symbiote] .theme-signature{filter:drop-shadow(0 12px 18px rgba(234,239,247,.18)) !important;}
+html[data-template=blush] .theme-signature{filter:drop-shadow(0 10px 16px rgba(255,148,206,.22)) !important;}
+html[data-template=ocean] .theme-signature{filter:drop-shadow(0 11px 17px rgba(120,228,255,.20)) !important;}
+html[data-template=pearl] .theme-signature{filter:drop-shadow(0 10px 16px rgba(226,240,255,.20)) !important;}
+
+/* bring back center card glow for signature themes */
+html[data-template=pink] .balance-hero:after,
+html[data-template=christmas] .balance-hero:after,
+html[data-template=web] .balance-hero:after,
+html[data-template=symbiote] .balance-hero:after,
+html[data-template=blush] .balance-hero:after,
+html[data-template=ocean] .balance-hero:after,
+html[data-template=pearl] .balance-hero:after{
+  display:block !important;
+  opacity:.18 !important;
+  filter:blur(42px) !important;
+}
+html[data-template=pink] .balance-hero:after{background:radial-gradient(circle at 58% 42%, rgba(255,196,224,.55), transparent 40%), linear-gradient(135deg, rgba(255,173,208,.45), rgba(255,214,232,.10)) !important;}
+html[data-template=christmas] .balance-hero:after{background:radial-gradient(circle at 54% 45%, rgba(255,224,170,.62), transparent 42%), linear-gradient(135deg, rgba(255,212,138,.30), rgba(214,76,84,.14)) !important; opacity:.22 !important;}
+html[data-template=web] .balance-hero:after{background:radial-gradient(circle at 58% 42%, rgba(255,105,130,.42), transparent 40%), radial-gradient(circle at 48% 58%, rgba(120,185,255,.18), transparent 30%), linear-gradient(135deg, rgba(196,28,54,.22), rgba(255,93,108,.10)) !important; opacity:.20 !important;}
+html[data-template=symbiote] .balance-hero:after{background:radial-gradient(circle at 58% 42%, rgba(248,250,255,.36), transparent 38%), linear-gradient(135deg, rgba(170,180,198,.16), rgba(255,255,255,.08)) !important; opacity:.17 !important;}
+html[data-template=blush] .balance-hero:after{background:radial-gradient(circle at 58% 42%, rgba(255,196,230,.45), transparent 38%), linear-gradient(135deg, rgba(255,138,196,.22), rgba(255,214,236,.10)) !important; opacity:.19 !important;}
+html[data-template=ocean] .balance-hero:after{background:radial-gradient(circle at 58% 42%, rgba(142,240,245,.40), transparent 38%), linear-gradient(135deg, rgba(63,180,214,.18), rgba(169,255,246,.08)) !important; opacity:.18 !important;}
+html[data-template=pearl] .balance-hero:after{background:radial-gradient(circle at 58% 42%, rgba(238,246,255,.42), transparent 38%), linear-gradient(135deg, rgba(193,215,240,.18), rgba(255,255,255,.08)) !important; opacity:.18 !important;}
+
+/* thermal-lite / iPhone: lighter blur, still visible */
+html.thermal-lite[data-template=pink] .theme-signature,
+html.thermal-lite[data-template=christmas] .theme-signature,
+html.thermal-lite[data-template=web] .theme-signature,
+html.thermal-lite[data-template=symbiote] .theme-signature,
+html.thermal-lite[data-template=blush] .theme-signature,
+html.thermal-lite[data-template=ocean] .theme-signature,
+html.thermal-lite[data-template=pearl] .theme-signature{
+  filter:saturate(108%) drop-shadow(0 8px 12px rgba(0,0,0,.10)) !important;
+}
+html.thermal-lite[data-template=pink] .balance-hero:after,
+html.thermal-lite[data-template=christmas] .balance-hero:after,
+html.thermal-lite[data-template=web] .balance-hero:after,
+html.thermal-lite[data-template=symbiote] .balance-hero:after,
+html.thermal-lite[data-template=blush] .balance-hero:after,
+html.thermal-lite[data-template=ocean] .balance-hero:after,
+html.thermal-lite[data-template=pearl] .balance-hero:after{
+  display:block !important;
+  filter:blur(26px) !important;
+  opacity:.13 !important;
+}
+html.thermal-lite[data-template=christmas] .balance-hero:after{opacity:.16 !important;}
+html.thermal-lite[data-template=web] .balance-hero:after{opacity:.15 !important;}
