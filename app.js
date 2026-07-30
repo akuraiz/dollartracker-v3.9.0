@@ -1,7 +1,7 @@
 
 "use strict";
 
-const APP_VERSION = "3.9.9";
+const APP_VERSION = "3.9.10";
 const RECORD_KEY = "dollarTracker.records.v3";
 const SETTINGS_KEY = "dollarTracker.settings.v3";
 const STATE_KEY = "dollarTracker.state.v3";
@@ -1357,6 +1357,7 @@ function hideSheet(selector) {
 
 
 let activeChoiceSelect = null;
+const USE_NATIVE_SELECTS = true;
 
 function choiceTitleForSelect(select) {
   const id = select?.id || "";
@@ -1423,6 +1424,10 @@ function chooseChoiceValue(value) {
 
 function bindChoiceSelect(select) {
   if (!select || select.dataset.choiceBound === "true") return;
+  if (USE_NATIVE_SELECTS) {
+    select.dataset.choiceBound = "native";
+    return;
+  }
   select.dataset.choiceBound = "true";
   select.addEventListener("pointerdown", event => {
     if (select.disabled) return;

@@ -481,3 +481,10 @@ No storage schema change. No money logic changes beyond preserving historical KH
 - Increased picker sheet opacity so underlying form fields no longer show through.
 - Strengthened the backdrop dim and made option rows more solid for readability.
 - Kept Safari thermal mode free of live backdrop blur.
+
+
+## v3.9.10 Lower Translucency + Native iOS Picker
+
+- Reduced dark-mode translucency across calculator, sheets, cards, and form controls so content is easier to read on iPhone.
+- Restored native iOS picker behavior for dropdown fields instead of the custom category choice sheet.
+- Strengthened dark backdrop overlays while keeping Safari thermal optimization.
