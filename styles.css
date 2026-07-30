@@ -1214,11 +1214,6 @@ body.floating-save-ready #saveRecordBtn{
   height:100%;
   align-content:center;
 }
-.record-card.swipe-open .record-card-body,
-.record-card.swipe-dragging .record-card-body{
-  border-top-right-radius:0;
-  border-bottom-right-radius:0;
-}
 .record-card:not(.swipe-open):not(.swipe-dragging) .record-card-body{
   transform:translate3d(0,0,0)!important;
 }
@@ -1664,3 +1659,159 @@ html[data-theme=light] select{
   label:has(select)::after{right:13px}
 }
 .profile-photo-actions:has(> :only-child){grid-template-columns:1fr}
+
+
+/* ===========================================================================
+   v3.9.4 — Rounded swipe seam, iOS calculator, and diagnostics
+=========================================================================== */
+.record-card.swipe-open .record-card-body,
+.record-card.swipe-dragging .record-card-body{
+  border-radius:inherit;
+  box-shadow:8px 0 20px rgba(0,0,0,.14);
+}
+.record-swipe-actions{
+  border-radius:22px;
+  background:var(--danger);
+}
+.swipe-edit-btn:first-child{border-radius:22px 0 0 22px}
+.swipe-delete-btn:last-child{border-radius:0 22px 22px 0}
+
+.calc-display-shell{
+  min-height:104px;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:rgba(255,255,255,.08);
+  padding:14px 18px 12px;
+  margin:0 0 14px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  justify-content:flex-end;
+  overflow:hidden;
+}
+.calc-trail{
+  min-height:22px;
+  width:100%;
+  color:var(--muted);
+  text-align:right;
+  font-size:14px;
+  font-weight:700;
+  line-height:1.35;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  opacity:.38;
+  transition:opacity .18s ease, transform .18s ease;
+}
+.calc-trail.has-value{opacity:1;transform:translateY(0)}
+.calc-display{
+  min-height:58px;
+  width:100%;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  padding:4px 0 0;
+  margin:0;
+  font-size:clamp(38px,12vw,54px);
+  line-height:1;
+  letter-spacing:-.055em;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.ios-calc-grid{gap:10px}
+.ios-calc-grid button{
+  min-height:58px;
+  border-radius:999px;
+  font-size:23px;
+  transition:transform .12s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.ios-calc-grid .span-two{
+  border-radius:999px;
+  place-items:center start;
+  padding-left:24px;
+}
+.ios-calc-grid .calc-function-key{
+  background:var(--surface-2);
+  color:var(--text);
+}
+.ios-calc-grid .calc-operator-key{
+  background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
+  color:var(--on-accent);
+  border-color:transparent;
+}
+.ios-calc-grid .calc-operator-key.active{
+  background:var(--text);
+  color:var(--bg);
+  box-shadow:0 0 0 3px var(--line-strong);
+}
+.calc-use-button{margin-top:12px}
+
+.diagnostic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.diagnostic-grid article{border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:12px;min-width:0}
+.diagnostic-grid span{display:block;color:var(--muted);font-size:10.5px;font-weight:800;line-height:1.3;margin-bottom:5px}
+.diagnostic-grid strong{display:block;font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+.diagnostic-check-hint{margin:2px 0 -2px}
+.data-check-result{display:none;border:1px solid var(--line);border-radius:18px;padding:12px;font-size:12px;line-height:1.5}
+.data-check-result.clean,.data-check-result.has-issues{display:block}
+.data-check-result.clean{background:var(--positive-wash);color:var(--positive)}
+.data-check-result.has-issues{background:var(--danger-wash);color:var(--danger)}
+.data-check-result strong{display:block}
+.data-check-result ul{margin:8px 0 0;padding-left:18px;color:var(--text)}
+.data-check-result small{display:block;margin-top:6px;color:var(--muted)}
+
+@media (max-width:370px){
+  .diagnostic-grid{grid-template-columns:1fr}
+  .ios-calc-grid{gap:8px}
+  .ios-calc-grid button{min-height:52px;font-size:21px}
+  .calc-display-shell{min-height:96px;padding-inline:15px}
+}
+
+/* ===========================================================================
+   v3.9.5 — Final Stability + iOS Picker Polish
+=========================================================================== */
+select{
+  min-height:54px!important;
+  border-radius:21px!important;
+  background:rgba(255,255,255,.09)!important;
+  border:1px solid var(--line)!important;
+  color:var(--text)!important;
+  font-weight:800!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10)!important;
+  transform:none!important;
+  transition:border-color .18s ease, background .18s ease, box-shadow .18s ease!important;
+}
+select:focus{
+  transform:none!important;
+  background:rgba(255,255,255,.11)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 4px color-mix(in srgb,var(--accent-1) 10%,transparent)!important;
+}
+label:has(select)::after{transform:none!important;content:"⌄";font-size:18px;bottom:15px}
+html[data-theme=light] select{background:rgba(255,255,255,.76)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.70)!important}
+.choice-sheet-backdrop{position:fixed;inset:0;z-index:69;display:none;visibility:hidden;opacity:0;pointer-events:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.34);padding:16px;padding-bottom:calc(16px + var(--safe-bottom));transition:opacity .22s ease;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.choice-sheet-backdrop.show{display:flex;visibility:visible;opacity:1;pointer-events:auto}
+.choice-sheet{width:min(100%,448px);max-height:min(82svh,680px);overflow:hidden;border-radius:34px 34px 28px 28px;padding:16px;animation:choiceSheetIn .32s cubic-bezier(.22,1,.36,1) both}
+@keyframes choiceSheetIn{from{opacity:0;transform:translate3d(0,28px,0) scale(.975);filter:blur(5px)}to{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+.choice-list{display:grid;gap:8px;max-height:min(54svh,440px);overflow:auto;padding:2px 2px 4px;overscroll-behavior:contain;scrollbar-width:none}
+.choice-list::-webkit-scrollbar{display:none}
+.choice-option{width:100%;min-height:56px;border:1px solid var(--line);border-radius:21px;background:rgba(255,255,255,.075);color:var(--text);display:grid;grid-template-columns:minmax(0,1fr) 26px;gap:10px;align-items:center;text-align:left;padding:12px 14px;font-weight:900;transition:transform .14s cubic-bezier(.22,1,.36,1),background .18s ease,border-color .18s ease,box-shadow .18s ease}
+.choice-option:active{transform:scale(.985)}
+.choice-option span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.choice-option svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.7);transition:opacity .18s ease,transform .18s cubic-bezier(.22,1,.36,1)}
+.choice-option.active{background:linear-gradient(135deg,color-mix(in srgb,var(--accent-1) 23%,transparent),color-mix(in srgb,var(--accent-2) 14%,transparent));border-color:var(--line-strong);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 12px 30px rgba(0,0,0,.10)}
+.choice-option.active svg{opacity:1;transform:scale(1);color:var(--accent-1)}
+html[data-theme=light] .choice-option{background:rgba(255,255,255,.72)}
+html[data-theme=light] .choice-option.active{background:linear-gradient(135deg,rgba(255,255,255,.94),color-mix(in srgb,var(--accent-1) 20%,rgba(255,255,255,.78)))}
+
+.record-card.swipe-open .record-card-body,
+.record-card.swipe-dragging .record-card-body{border-top-right-radius:22px!important;border-bottom-right-radius:22px!important;overflow:hidden;box-shadow:10px 0 22px rgba(0,0,0,.16)}
+.record-card.swipe-open .record-swipe-actions,
+.record-card.swipe-dragging .record-swipe-actions{border-radius:22px!important;overflow:hidden}
+.swipe-edit-btn:first-child{border-top-left-radius:22px!important;border-bottom-left-radius:22px!important}
+.swipe-delete-btn:last-child{border-top-right-radius:22px!important;border-bottom-right-radius:22px!important}
+
+.calc-display-shell{background:rgba(255,255,255,.075);border-color:var(--line)}
+.calc-trail{font-variant-numeric:tabular-nums}
+.ios-calc-grid button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.ios-calc-grid button:active{transform:scale(.94)}
+.ios-calc-grid .calc-operator-key.active{background:var(--surface-2);color:var(--accent-1);box-shadow:inset 0 0 0 2px var(--accent-1)}

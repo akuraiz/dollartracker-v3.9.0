@@ -435,3 +435,26 @@ No storage schema change. No money logic changes beyond preserving historical KH
 - Guarded invalid backup dates from rendering as Invalid Date.
 - Optimized root language flag images into real small PNG files for faster top-bar rendering.
 - Kept UI simple and avoided adding new visible features in this pass.
+
+
+## v3.9.4 Calculator + Release Polish
+
+- Kept the History swipe card itself rounded while Edit/Delete actions are revealed, avoiding the blocky middle seam while preserving the iOS-style swipe interaction.
+- Rebuilt the calculator keypad into an iOS-inspired layout with AC, plus/minus, percent, operator column, wide zero key, and equals key.
+- Added a small calculator expression line so the previous amount/operator stays visible while doing math.
+- Calculator USD display now shows `$5` for whole-dollar values and preserves decimals only when typed or produced by math, instead of forcing `$5.00`.
+- Added a compact Settings Diagnostics panel with app version, profiles, record counts, storage estimate, service-worker availability, and a Run Data Check button.
+- Kept records, backup format, profile storage, and money-history logic unchanged.
+
+
+## v3.9.5 Final Stability + iOS Picker Polish
+
+- Replaced the remaining native select/dropdown opening behavior with a shared iOS-style choice sheet for Add category, Edit category, Edit currency, and History sort.
+- Kept the closed dropdown fields visually calm and close to the older clean style, without the jumpy focus movement.
+- Added smooth choice-sheet motion, checkmarked active choices, outside-tap/Escape close behavior, and safe-area-aware bottom placement.
+- Fixed calculator edge cases around negative second operands, incomplete operations, typed decimal trails, Use Amount behavior, repeated equals, and currency switching.
+- Preserved explicit USD decimal typing in the calculator trail while still showing whole-dollar values as `$5` by default.
+- Made primary record storage authoritative so stale legacy mirrors cannot revive deleted or older records after profile-era updates.
+- Replaced the record-count-only backup reminder trigger with a backup change counter that tracks real app changes and resets after a successful backup export.
+- Added clearer localStorage failure warning behavior so save failures are not silent.
+- Kept the History swipe action seam rounded and polished without changing record or profile storage schemas.

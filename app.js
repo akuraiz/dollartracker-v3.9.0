@@ -1,7 +1,7 @@
 
 "use strict";
 
-const APP_VERSION = "3.9.3";
+const APP_VERSION = "3.9.5";
 const RECORD_KEY = "dollarTracker.records.v3";
 const SETTINGS_KEY = "dollarTracker.settings.v3";
 const STATE_KEY = "dollarTracker.state.v3";
@@ -43,6 +43,7 @@ const defaultSettings = {
   categories: [],
   categoryBudgets: {},
   lastBackupRecordCount: 0,
+  backupChangeCount: 0,
   profiles: [],
   activeProfileId: ""
 };
@@ -81,7 +82,7 @@ const I18N = {
     addedFallback:"Amount added", usedFallback:"Amount used", changedToEnglish:"Changed to English", changedToKhmer:"Changed to Khmer",
     edit:"Edit", editRecord:"Edit Record",
     editHint:"History amounts stay locked unless you edit this record.", currency:"Currency", saveChanges:"Save Changes", recordUpdated:"Record updated", category:"Category", thisMonth:"This Month", monthlyHint:"Quick monthly view", balance:"Balance", topCategory:"Top category: {category}", none:"None",
-    monthlyBudgets:"Monthly Budgets", monthlyBudgetsHint:"Track spending caps for this month.", categoryChart:"Category Breakdown", categoryChartHint:"This month’s spending by category.", noCategorySpending:"No category spending this month.", categoryManager:"Manage Categories", categoryManagerHint:"Add, rename, remove, or reset categories.", newCategoryPlaceholder:"New category name", addCategory:"Add", save:"Save", remove:"Remove", resetCategories:"Reset to Default", categoryExists:"Category already exists", categoryAdded:"Category added", categoryRenamed:"Category renamed", categoryRemoved:"Category removed", categoriesReset:"Categories reset", cannotRemoveOther:"Other cannot be removed", removeCategoryConfirm:"Remove this category? Existing records will move to Other.", resetCategoriesConfirm:"Reset categories to default? Custom categories will move to Other.", categoryBudgets:"Category Budgets", categoryBudgetsHint:"Monthly caps per category. Stored internally in USD.", budgetCurrencyNote:"Shown in current display currency.", saveBudgets:"Save Budgets", budgetsSaved:"Budgets saved", noBudgetsSet:"No budgets set yet. Add caps in Settings.", budgetSpentLine:"{spent} of {budget}", budgetInputHint:"Leave 0 for no cap.", quickAC:"AC", quickAC:"AC", quickFood:"Food", quickCoffee:"Coffee", quickTransfer:"Transfer", quickShopping:"Shopping", catFood:"Food", catTransfer:"Transfer", catShopping:"Shopping", catTransport:"Transport", catSavings:"Savings", catOther:"Other", calculator:"Calculator", calculatorHint:"Calculate and use as amount.", useAmount:"Use Amount", khrWholeOnly:"KHR uses whole Riel only", quickTransport:"Transport", showMore:"Show more", showingRecords:"Showing {shown} of {total}", editHistory:"Edit History", noEdits:"No edits yet.", editedOn:"Edited {date}", editChangeLine:"{field}: {from} → {to}", fieldType:"Type", fieldAmount:"Amount", fieldCategory:"Category", fieldDescription:"Description", fieldDate:"Date", fieldNote:"Note", selectedRecords:"{count} selected", selectedTotal:"Selected total", clearSelection:"Clear", selectRecord:"Select record", selectHistory:"Select", doneSelection:"Done", selectAllVisible:"Select visible", quickAdd:"Quick Add", quickAddHint:"Fast entry with clean presets.", quickAddAmount:"Amount", saveQuickAdd:"Save Quick Add", openFullAdd:"Open full Add", importPreview:"Import backup?\n\nBackup records: {count}\nExported: {date}\nVersion: {version}\n\nThis will replace current records in this browser.", backupReminderNewRecordsText:"You added 10+ records since your last backup. Export one now so your records stay safe.", newVersionAvailable:"New version available. Reopen app."
+    monthlyBudgets:"Monthly Budgets", monthlyBudgetsHint:"Track spending caps for this month.", categoryChart:"Category Breakdown", categoryChartHint:"This month’s spending by category.", noCategorySpending:"No category spending this month.", categoryManager:"Manage Categories", categoryManagerHint:"Add, rename, remove, or reset categories.", newCategoryPlaceholder:"New category name", addCategory:"Add", save:"Save", remove:"Remove", resetCategories:"Reset to Default", categoryExists:"Category already exists", categoryAdded:"Category added", categoryRenamed:"Category renamed", categoryRemoved:"Category removed", categoriesReset:"Categories reset", cannotRemoveOther:"Other cannot be removed", removeCategoryConfirm:"Remove this category? Existing records will move to Other.", resetCategoriesConfirm:"Reset categories to default? Custom categories will move to Other.", categoryBudgets:"Category Budgets", categoryBudgetsHint:"Monthly caps per category. Stored internally in USD.", budgetCurrencyNote:"Shown in current display currency.", saveBudgets:"Save Budgets", budgetsSaved:"Budgets saved", noBudgetsSet:"No budgets set yet. Add caps in Settings.", budgetSpentLine:"{spent} of {budget}", budgetInputHint:"Leave 0 for no cap.", quickAC:"AC", quickFood:"Food", quickCoffee:"Coffee", quickTransfer:"Transfer", quickShopping:"Shopping", catFood:"Food", catTransfer:"Transfer", catShopping:"Shopping", catTransport:"Transport", catSavings:"Savings", catOther:"Other", calculator:"Calculator", calculatorHint:"Calculate and use as amount.", useAmount:"Use Amount", khrWholeOnly:"KHR uses whole Riel only", calcClear:"AC", calcPlusMinus:"Change sign", calcPercent:"Percent", calcError:"Error", diagnostics:"Diagnostics", diagnosticsHint:"Check app health without changing your data.", appVersion:"App version", profileCount:"Profiles", recordCount:"Records", storageUsed:"Storage used", serviceWorker:"Offline app", ready:"Ready", unavailable:"Unavailable", runDataCheck:"Run Data Check", dataCheckClean:"No data problems found.", dataCheckIssues:"{count} issue(s) found.", dataCheckHint:"This check does not modify your data.", quickTransport:"Transport", showMore:"Show more", showingRecords:"Showing {shown} of {total}", editHistory:"Edit History", noEdits:"No edits yet.", editedOn:"Edited {date}", editChangeLine:"{field}: {from} → {to}", fieldType:"Type", fieldAmount:"Amount", fieldCategory:"Category", fieldDescription:"Description", fieldDate:"Date", fieldNote:"Note", selectedRecords:"{count} selected", selectedTotal:"Selected total", clearSelection:"Clear", selectRecord:"Select record", selectHistory:"Select", doneSelection:"Done", selectAllVisible:"Select visible", quickAdd:"Quick Add", quickAddHint:"Fast entry with clean presets.", quickAddAmount:"Amount", saveQuickAdd:"Save Quick Add", openFullAdd:"Open full Add", importPreview:"Import backup?\n\nBackup records: {count}\nExported: {date}\nVersion: {version}\n\nThis will replace current records in this browser.", backupReminderNewRecordsText:"You added 10+ records since your last backup. Export one now so your records stay safe.", newVersionAvailable:"New version available. Reopen app."
   },
   km: {
     eyebrow:"បញ្ជីទឹកប្រាក់ឯកជន", home:"ទំព័រដើម", add:"បញ្ចូល", addRecord:"បញ្ចូលកំណត់ត្រា", history:"ប្រវត្តិ", backup:"បម្រុងទុក", settings:"ការកំណត់",
@@ -111,7 +112,7 @@ const I18N = {
     importConfirm:"នាំចូល Backup? វានឹងជំនួសកំណត់ត្រាបច្ចុប្បន្នក្នុង Browser នេះ។", importError:"មិនអាចនាំចូល Backup បានទេ។ សូមពិនិត្យថា វាជាឯកសារ JSON ត្រឹមត្រូវ។",
     addedFallback:"ទឹកប្រាក់បានបន្ថែម", usedFallback:"ទឹកប្រាក់បានប្រើ", changedToEnglish:"បានប្តូរទៅភាសាអង់គ្លេស", changedToKhmer:"បានប្តូរទៅភាសាខ្មែរ",
     edit:"កែ", editRecord:"កែប្រែកំណត់ត្រា",
-    editHint:"ចំនួនទឹកប្រាក់ក្នុងប្រវត្តិនឹងនៅដដែល លុះត្រាតែអ្នកកែប្រែកំណត់ត្រានេះ។", currency:"រូបិយប័ណ្ណ", saveChanges:"រក្សាទុកការកែប្រែ", recordUpdated:"បានកែប្រែកំណត់ត្រា", category:"ប្រភេទ", thisMonth:"ខែនេះ", monthlyHint:"សង្ខេបប្រចាំខែ", balance:"សមតុល្យ", topCategory:"ប្រភេទប្រើច្រើនបំផុត៖ {category}", monthlyBudgets:"ថវិកាប្រចាំខែ", monthlyBudgetsHint:"តាមដានកម្រិតចំណាយសម្រាប់ខែនេះ។", categoryChart:"បំបែកតាមប្រភេទ", categoryChartHint:"ចំណាយខែនេះតាមប្រភេទ។", noCategorySpending:"មិនទាន់មានចំណាយតាមប្រភេទសម្រាប់ខែនេះ។", categoryManager:"គ្រប់គ្រងប្រភេទ", categoryManagerHint:"បន្ថែម ប្តូរឈ្មោះ លុប ឬកំណត់ប្រភេទឡើងវិញ។", newCategoryPlaceholder:"ឈ្មោះប្រភេទថ្មី", addCategory:"បន្ថែម", save:"រក្សាទុក", remove:"លុប", resetCategories:"កំណត់លំនាំដើម", categoryExists:"ប្រភេទនេះមានរួចហើយ", categoryAdded:"បានបន្ថែមប្រភេទ", categoryRenamed:"បានប្តូរឈ្មោះប្រភេទ", categoryRemoved:"បានលុបប្រភេទ", categoriesReset:"បានកំណត់ប្រភេទឡើងវិញ", cannotRemoveOther:"មិនអាចលុប ផ្សេងៗ បានទេ", removeCategoryConfirm:"លុបប្រភេទនេះ? កំណត់ត្រាដែលមានស្រាប់នឹងផ្លាស់ទៅ ផ្សេងៗ។", resetCategoriesConfirm:"កំណត់ប្រភេទទៅលំនាំដើមវិញ? ប្រភេទផ្ទាល់ខ្លួននឹងផ្លាស់ទៅ ផ្សេងៗ។", categoryBudgets:"ថវិកាតាមប្រភេទ", categoryBudgetsHint:"កម្រិតប្រចាំខែតាមប្រភេទ។ រក្សាទុកជាប្រាក់ដុល្លារខាងក្នុង។", budgetCurrencyNote:"បង្ហាញជារូបិយប័ណ្ណបច្ចុប្បន្ន។", saveBudgets:"រក្សាទុកថវិកា", budgetsSaved:"បានរក្សាទុកថវិកា", noBudgetsSet:"មិនទាន់កំណត់ថវិកា។ បន្ថែមកម្រិតក្នុងការកំណត់។", budgetSpentLine:"{spent} នៃ {budget}", budgetInputHint:"ទុក 0 ប្រសិនបើគ្មានកម្រិត។", editHistory:"ប្រវត្តិកែប្រែ", noEdits:"មិនទាន់មានការកែប្រែ។", editedOn:"បានកែ {date}", editChangeLine:"{field}: {from} → {to}", fieldType:"ប្រភេទ", fieldAmount:"ចំនួនទឹកប្រាក់", fieldCategory:"ប្រភេទ", fieldDescription:"ការពិពណ៌នា", fieldDate:"កាលបរិច្ឆេទ", fieldNote:"ចំណាំ", selectedRecords:"បានជ្រើស {count}", selectedTotal:"សរុបដែលបានជ្រើស", clearSelection:"លុបជម្រើស", selectRecord:"ជ្រើសកំណត់ត្រា", selectHistory:"ជ្រើស", doneSelection:"រួចរាល់", selectAllVisible:"ជ្រើសដែលមើលឃើញ", quickAdd:"បញ្ចូលលឿន", quickAddHint:"បញ្ចូលរហ័សដោយប្រើជម្រើសស្អាតៗ។", quickAddAmount:"ចំនួនទឹកប្រាក់", saveQuickAdd:"រក្សាទុកលឿន", openFullAdd:"បើកទំព័របញ្ចូលពេញ", importPreview:"នាំចូល Backup?\n\nកំណត់ត្រា Backup: {count}\nបាននាំចេញ: {date}\nកំណែ: {version}\n\nវានឹងជំនួសកំណត់ត្រាបច្ចុប្បន្នក្នុង Browser នេះ។", backupReminderNewRecordsText:"អ្នកបានបញ្ចូលកំណត់ត្រា 10+ ចាប់តាំងពី Backup ចុងក្រោយ។ សូមនាំចេញ Backup ដើម្បីរក្សាកំណត់ត្រាឱ្យមានសុវត្ថិភាព។", none:"គ្មាន", quickAC:"AC", quickAC:"AC", quickFood:"អាហារ", quickCoffee:"កាហ្វេ", quickTransfer:"ផ្ទេរ", quickShopping:"ទិញឥវ៉ាន់", catFood:"អាហារ", catTransfer:"ផ្ទេរ", catShopping:"ទិញឥវ៉ាន់", catTransport:"ធ្វើដំណើរ", catSavings:"សន្សំ", catOther:"ផ្សេងៗ", calculator:"ម៉ាស៊ីនគិតលេខ", calculatorHint:"គណនា ហើយយកទៅប្រើជាចំនួនទឹកប្រាក់។", useAmount:"ប្រើចំនួននេះ", khrWholeOnly:"KHR ប្រើតែចំនួនរៀលពេញ", quickTransport:"ធ្វើដំណើរ", showMore:"មើលបន្ថែម", showingRecords:"បង្ហាញ {shown} ក្នុងចំណោម {total}", newVersionAvailable:"មានកំណែថ្មី។ សូមបើកកម្មវិធីឡើងវិញ។"
+    editHint:"ចំនួនទឹកប្រាក់ក្នុងប្រវត្តិនឹងនៅដដែល លុះត្រាតែអ្នកកែប្រែកំណត់ត្រានេះ។", currency:"រូបិយប័ណ្ណ", saveChanges:"រក្សាទុកការកែប្រែ", recordUpdated:"បានកែប្រែកំណត់ត្រា", category:"ប្រភេទ", thisMonth:"ខែនេះ", monthlyHint:"សង្ខេបប្រចាំខែ", balance:"សមតុល្យ", topCategory:"ប្រភេទប្រើច្រើនបំផុត៖ {category}", monthlyBudgets:"ថវិកាប្រចាំខែ", monthlyBudgetsHint:"តាមដានកម្រិតចំណាយសម្រាប់ខែនេះ។", categoryChart:"បំបែកតាមប្រភេទ", categoryChartHint:"ចំណាយខែនេះតាមប្រភេទ។", noCategorySpending:"មិនទាន់មានចំណាយតាមប្រភេទសម្រាប់ខែនេះ។", categoryManager:"គ្រប់គ្រងប្រភេទ", categoryManagerHint:"បន្ថែម ប្តូរឈ្មោះ លុប ឬកំណត់ប្រភេទឡើងវិញ។", newCategoryPlaceholder:"ឈ្មោះប្រភេទថ្មី", addCategory:"បន្ថែម", save:"រក្សាទុក", remove:"លុប", resetCategories:"កំណត់លំនាំដើម", categoryExists:"ប្រភេទនេះមានរួចហើយ", categoryAdded:"បានបន្ថែមប្រភេទ", categoryRenamed:"បានប្តូរឈ្មោះប្រភេទ", categoryRemoved:"បានលុបប្រភេទ", categoriesReset:"បានកំណត់ប្រភេទឡើងវិញ", cannotRemoveOther:"មិនអាចលុប ផ្សេងៗ បានទេ", removeCategoryConfirm:"លុបប្រភេទនេះ? កំណត់ត្រាដែលមានស្រាប់នឹងផ្លាស់ទៅ ផ្សេងៗ។", resetCategoriesConfirm:"កំណត់ប្រភេទទៅលំនាំដើមវិញ? ប្រភេទផ្ទាល់ខ្លួននឹងផ្លាស់ទៅ ផ្សេងៗ។", categoryBudgets:"ថវិកាតាមប្រភេទ", categoryBudgetsHint:"កម្រិតប្រចាំខែតាមប្រភេទ។ រក្សាទុកជាប្រាក់ដុល្លារខាងក្នុង។", budgetCurrencyNote:"បង្ហាញជារូបិយប័ណ្ណបច្ចុប្បន្ន។", saveBudgets:"រក្សាទុកថវិកា", budgetsSaved:"បានរក្សាទុកថវិកា", noBudgetsSet:"មិនទាន់កំណត់ថវិកា។ បន្ថែមកម្រិតក្នុងការកំណត់។", budgetSpentLine:"{spent} នៃ {budget}", budgetInputHint:"ទុក 0 ប្រសិនបើគ្មានកម្រិត។", editHistory:"ប្រវត្តិកែប្រែ", noEdits:"មិនទាន់មានការកែប្រែ។", editedOn:"បានកែ {date}", editChangeLine:"{field}: {from} → {to}", fieldType:"ប្រភេទ", fieldAmount:"ចំនួនទឹកប្រាក់", fieldCategory:"ប្រភេទ", fieldDescription:"ការពិពណ៌នា", fieldDate:"កាលបរិច្ឆេទ", fieldNote:"ចំណាំ", selectedRecords:"បានជ្រើស {count}", selectedTotal:"សរុបដែលបានជ្រើស", clearSelection:"លុបជម្រើស", selectRecord:"ជ្រើសកំណត់ត្រា", selectHistory:"ជ្រើស", doneSelection:"រួចរាល់", selectAllVisible:"ជ្រើសដែលមើលឃើញ", quickAdd:"បញ្ចូលលឿន", quickAddHint:"បញ្ចូលរហ័សដោយប្រើជម្រើសស្អាតៗ។", quickAddAmount:"ចំនួនទឹកប្រាក់", saveQuickAdd:"រក្សាទុកលឿន", openFullAdd:"បើកទំព័របញ្ចូលពេញ", importPreview:"នាំចូល Backup?\n\nកំណត់ត្រា Backup: {count}\nបាននាំចេញ: {date}\nកំណែ: {version}\n\nវានឹងជំនួសកំណត់ត្រាបច្ចុប្បន្នក្នុង Browser នេះ។", backupReminderNewRecordsText:"អ្នកបានបញ្ចូលកំណត់ត្រា 10+ ចាប់តាំងពី Backup ចុងក្រោយ។ សូមនាំចេញ Backup ដើម្បីរក្សាកំណត់ត្រាឱ្យមានសុវត្ថិភាព។", none:"គ្មាន", quickAC:"AC", quickFood:"អាហារ", quickCoffee:"កាហ្វេ", quickTransfer:"ផ្ទេរ", quickShopping:"ទិញឥវ៉ាន់", catFood:"អាហារ", catTransfer:"ផ្ទេរ", catShopping:"ទិញឥវ៉ាន់", catTransport:"ធ្វើដំណើរ", catSavings:"សន្សំ", catOther:"ផ្សេងៗ", calculator:"ម៉ាស៊ីនគិតលេខ", calculatorHint:"គណនា ហើយយកទៅប្រើជាចំនួនទឹកប្រាក់។", useAmount:"ប្រើចំនួននេះ", khrWholeOnly:"KHR ប្រើតែចំនួនរៀលពេញ", calcClear:"AC", calcPlusMinus:"ប្តូរសញ្ញា", calcPercent:"ភាគរយ", calcError:"កំហុស", diagnostics:"ការពិនិត្យកម្មវិធី", diagnosticsHint:"ពិនិត្យសុខភាពកម្មវិធីដោយមិនប្តូរទិន្នន័យ។", appVersion:"កំណែកម្មវិធី", profileCount:"ប្រវត្តិរូប", recordCount:"កំណត់ត្រា", storageUsed:"ទំហំផ្ទុក", serviceWorker:"កម្មវិធី Offline", ready:"រួចរាល់", unavailable:"មិនមាន", runDataCheck:"ពិនិត្យទិន្នន័យ", dataCheckClean:"មិនឃើញបញ្ហាទិន្នន័យទេ។", dataCheckIssues:"រកឃើញបញ្ហា {count}", dataCheckHint:"ការពិនិត្យនេះមិនកែប្រែទិន្នន័យទេ។", quickTransport:"ធ្វើដំណើរ", showMore:"មើលបន្ថែម", showingRecords:"បង្ហាញ {shown} ក្នុងចំណោម {total}", newVersionAvailable:"មានកំណែថ្មី។ សូមបើកកម្មវិធីឡើងវិញ។"
   }
 };
 
@@ -129,7 +130,7 @@ Object.assign(I18N.en, {
   importPreviewLegacyProfile: "Import old backup into {profile}?\n\nBackup records: {records}\nCurrent records in {profile}: {current}\nExported: {date}\nVersion: {version}\n\nThis replaces only this profile's records. Other profiles stay untouched.",
   backupImportedProfile: "Backup imported into {profile}",
   clearProfileRecords: "Clear Current Profile Records", clearProfileHint:"Tap twice to clear records for the active profile only.", profileLimitReached:"Profile limit reached.",
-  editProfile: "Edit Profile", profileActions: "Profile actions", profilePhoto: "Profile photo"
+  editProfile: "Edit Profile", profileActions: "Profile actions", profilePhoto: "Profile photo", chooseOption: "Choose", storageSaveFailed: "Storage is full. Export a backup before adding more.", dataSavedWarning: "Could not save changes. Export a backup now."
 });
 
 Object.assign(I18N.km, {
@@ -146,7 +147,7 @@ Object.assign(I18N.km, {
   importPreviewLegacyProfile: "នាំចូល Backup ចាស់ទៅ {profile}?\n\nកំណត់ត្រា Backup: {records}\nកំណត់ត្រាបច្ចុប្បន្នក្នុង {profile}: {current}\nបាននាំចេញ: {date}\nកំណែ: {version}\n\nវានឹងជំនួសតែកំណត់ត្រារបស់ប្រវត្តិរូបនេះ។ ប្រវត្តិរូបផ្សេងៗនឹងនៅដដែល។",
   backupImportedProfile: "បាននាំចូល Backup ទៅ {profile}",
   clearProfileRecords: "លុបកំណត់ត្រាប្រវត្តិរូបបច្ចុប្បន្ន", clearProfileHint:"ចុចពីរដង ដើម្បីលុបតែកំណត់ត្រារបស់ប្រវត្តិរូបបច្ចុប្បន្ន។", profileLimitReached:"ចំនួនប្រវត្តិរូបដល់កំណត់ហើយ។",
-  editProfile: "កែប្រវត្តិរូប", profileActions: "សកម្មភាពប្រវត្តិរូប", profilePhoto: "រូបថតប្រវត្តិរូប"
+  editProfile: "កែប្រវត្តិរូប", profileActions: "សកម្មភាពប្រវត្តិរូប", profilePhoto: "រូបថតប្រវត្តិរូប", chooseOption: "ជ្រើស", storageSaveFailed: "ទំហំផ្ទុកពេញ។ សូមនាំចេញ Backup មុនបន្ថែមទៀត។", dataSavedWarning: "មិនអាចរក្សាទុកការផ្លាស់ប្តូរបានទេ។ សូមនាំចេញ Backup ឥឡូវនេះ។"
 });
 
 let records = [];
@@ -160,14 +161,31 @@ let historyVisibleCount = HISTORY_PAGE_SIZE;
 let clearArmedUntil = 0;
 let previousPageIndex = 0;
 let balanceAnimationFrame = null;
-let calcState = { currency: "USD", current: "0", stored: null, operator: null, fresh: true };
+let calcState = {
+  currency: "USD",
+  current: "0",
+  stored: null,
+  storedRaw: "0",
+  operator: null,
+  fresh: true,
+  trail: "",
+  lastOperator: null,
+  lastOperand: null,
+  lastOperandRaw: "0",
+  enteredSecondOperand: false,
+  justEvaluated: false,
+  error: false
+};
 let selectedRecordIds = new Set();
 let selectionMode = false;
 let activeSwipeCard = null;
+let appBooted = false;
+let storageWarningShown = false;
+let suppressChangeTracking = false;
 let quickAddState = { description: "Food", category: "food" };
 let profileSheetMode = "switch";
 
-const MODAL_BACKDROP_SELECTORS = ["#profileBackdrop", "#summaryBackdrop", "#historyFilterBackdrop", "#editBackdrop", "#quickAddBackdrop", "#calculatorBackdrop"];
+const MODAL_BACKDROP_SELECTORS = ["#profileBackdrop", "#summaryBackdrop", "#historyFilterBackdrop", "#editBackdrop", "#quickAddBackdrop", "#calculatorBackdrop", "#choiceBackdrop"];
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -182,13 +200,27 @@ function safeParse(key, fallback = null) {
   }
 }
 
+function showStorageWarning() {
+  if (!appBooted || storageWarningShown) return;
+  storageWarningShown = true;
+  showToast(tr("storageSaveFailed"));
+}
+
 function safeSet(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
+    showStorageWarning();
     return false;
   }
+}
+
+function markDataChanged(reason = "data") {
+  if (!appBooted || suppressChangeTracking) return;
+  const next = Number(settings.backupChangeCount || 0) + 1;
+  settings.backupChangeCount = Number.isFinite(next) ? Math.min(9999, next) : 1;
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { showStorageWarning(); }
 }
 
 function tr(key, vars = {}) {
@@ -469,6 +501,8 @@ function sanitizeSettings(input = {}) {
 
   const backupRecordCount = Number(merged.lastBackupRecordCount || 0);
   merged.lastBackupRecordCount = Number.isFinite(backupRecordCount) && backupRecordCount > 0 ? Math.floor(backupRecordCount) : 0;
+  const backupChangeCount = Number(merged.backupChangeCount || 0);
+  merged.backupChangeCount = Number.isFinite(backupChangeCount) && backupChangeCount > 0 ? Math.min(9999, Math.floor(backupChangeCount)) : 0;
 
   return merged;
 }
@@ -939,18 +973,23 @@ function loadRecords() {
   let sources = [];
 
   const primary = safeParse(RECORD_KEY, null);
-  sources = sources.concat(extractRecordsFromValue(primary));
+  const primaryRecords = extractRecordsFromValue(primary);
+  sources = sources.concat(primaryRecords);
 
-  // If the new store is empty, scan legacy keys and any obvious DollarTracker/Wifey keys.
-  const keys = new Set([...LEGACY_RECORD_KEYS]);
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (/wifey|dollartracker|money/i.test(key || "")) keys.add(key);
-  }
+  // Primary storage is authoritative. Legacy keys are read only as a fallback/migration
+  // source when the primary store has no importable records. This prevents stale
+  // legacy mirrors from reviving deleted or older records after profile-era updates.
+  if (!primaryRecords.length) {
+    const keys = new Set([...LEGACY_RECORD_KEYS]);
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (/wifey|dollartracker|money/i.test(key || "")) keys.add(key);
+    }
 
-  for (const key of keys) {
-    if (key === RECORD_KEY || key === SETTINGS_KEY || key === STATE_KEY) continue;
-    sources = sources.concat(extractRecordsFromValue(safeParse(key, null)));
+    for (const key of keys) {
+      if (key === RECORD_KEY || key === SETTINGS_KEY || key === STATE_KEY) continue;
+      sources = sources.concat(extractRecordsFromValue(safeParse(key, null)));
+    }
   }
 
   const map = new Map();
@@ -992,8 +1031,10 @@ function loadData() {
 }
 
 function saveRecords() {
-  safeSet(RECORD_KEY, records);
-  // Legacy mirror keeps old imports safer, but clearEverything removes it too.
+  markDataChanged("records");
+  const primarySaved = safeSet(RECORD_KEY, records);
+  // Legacy mirror is write-only compatibility; loadRecords reads it only if primary is empty.
+  if (!primarySaved) showStorageWarning();
   safeSet("wifeyMoneyRecords.liquid.v1", records.map(r => ({
     id: r.id,
     profileId: r.profileId || DEFAULT_PROFILE_ID,
@@ -1013,9 +1054,10 @@ function saveRecords() {
 }
 
 function saveSettings() {
+  markDataChanged("settings");
   saveActiveProfileLedger();
   settings = sanitizeSettings(settings);
-  safeSet(SETTINGS_KEY, settings);
+  if (!safeSet(SETTINGS_KEY, settings)) showStorageWarning();
   applyDocumentSettings();
 }
 
@@ -1313,11 +1355,103 @@ function hideSheet(selector) {
   syncModalOpenState();
 }
 
+
+let activeChoiceSelect = null;
+
+function choiceTitleForSelect(select) {
+  const id = select?.id || "";
+  if (id === "categoryInput" || id === "editCategoryInput") return tr("category");
+  if (id === "editCurrencyInput") return tr("currency");
+  if (id === "sortSelect") return tr("sortBy");
+  return tr("chooseOption");
+}
+
+function choiceHintForSelect(select) {
+  const id = select?.id || "";
+  if (id === "categoryInput" || id === "editCategoryInput") return tr("category");
+  if (id === "editCurrencyInput") return tr("currency");
+  if (id === "sortSelect") return tr("filterHint");
+  return tr("chooseOption");
+}
+
+function renderChoiceList() {
+  const list = $("#choiceList");
+  const select = activeChoiceSelect;
+  if (!list || !select) return;
+  const options = Array.from(select.options || []);
+  list.innerHTML = options.map(option => {
+    const selected = option.value === select.value;
+    return `
+      <button class="choice-option ${selected ? "active" : ""}" type="button" data-choice-value="${escapeHTML(option.value)}" aria-selected="${selected ? "true" : "false"}">
+        <span>${escapeHTML(option.textContent || option.value)}</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4 4L19 7.5"/></svg>
+      </button>
+    `;
+  }).join("");
+}
+
+function openChoiceSheet(select) {
+  if (!select || select.disabled) return;
+  closeOtherSwipeCards(null);
+  activeChoiceSelect = select;
+  setText("choiceSheetTitle", choiceTitleForSelect(select));
+  setText("choiceSheetHint", choiceHintForSelect(select));
+  renderChoiceList();
+  showSheet("#choiceBackdrop");
+  window.requestAnimationFrame(() => {
+    const active = $("#choiceList .choice-option.active");
+    active?.scrollIntoView?.({ block: "nearest" });
+  });
+}
+
+function closeChoiceSheet() {
+  hideSheet("#choiceBackdrop");
+  activeChoiceSelect = null;
+}
+
+function chooseChoiceValue(value) {
+  const select = activeChoiceSelect;
+  if (!select) return;
+  const oldValue = select.value;
+  select.value = value;
+  if (select.value !== oldValue) {
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  closeChoiceSheet();
+  hapticTick(6);
+}
+
+function bindChoiceSelect(select) {
+  if (!select || select.dataset.choiceBound === "true") return;
+  select.dataset.choiceBound = "true";
+  select.addEventListener("pointerdown", event => {
+    if (select.disabled) return;
+    event.preventDefault();
+    select.blur();
+    openChoiceSheet(select);
+  });
+  select.addEventListener("touchstart", event => {
+    if (select.disabled) return;
+    event.preventDefault();
+  }, { passive: false });
+  select.addEventListener("keydown", event => {
+    if (["Enter", " ", "ArrowDown", "ArrowUp"].includes(event.key)) {
+      event.preventDefault();
+      openChoiceSheet(select);
+    }
+  });
+}
+
+function bindChoiceSelects() {
+  ["#categoryInput", "#editCategoryInput", "#editCurrencyInput", "#sortSelect"].forEach(selector => bindChoiceSelect($(selector)));
+}
+
 function closeTopSheet() {
-  const ordered = ["#calculatorBackdrop", "#quickAddBackdrop", "#editBackdrop", "#historyFilterBackdrop", "#summaryBackdrop", "#profileBackdrop"];
+  const ordered = ["#choiceBackdrop", "#calculatorBackdrop", "#quickAddBackdrop", "#editBackdrop", "#historyFilterBackdrop", "#summaryBackdrop", "#profileBackdrop"];
   const top = ordered.find(selector => document.querySelector(selector)?.classList.contains("show"));
   if (top) {
-    hideSheet(top);
+    if (top === "#choiceBackdrop") closeChoiceSheet();
+    else hideSheet(top);
     return true;
   }
   if (selectionUIActive()) {
@@ -1352,8 +1486,8 @@ function translateUI() {
   setText("editTypeLabel", tr("type")); setText("editOutLabel", tr("out")); setText("editInLabel", tr("in"));
   setText("editCurrencyLabel", tr("currency")); setText("editAmountLabel", tr("amount")); setText("editCategoryLabel", tr("category"));
   setText("editDescriptionLabel", tr("whatFor")); setText("editDateLabel", tr("date")); setText("editNoteLabel", tr("note")); setText("saveEditBtn", tr("saveChanges")); setText("editHistoryTitle", tr("editHistory"));
-  setText("calculatorTitle", tr("calculator")); setText("calculatorHint", tr("calculatorHint")); setText("useCalcAmountBtn", tr("useAmount")); setText("quickAddTitle", tr("quickAdd")); setText("quickAddHint", tr("quickAddHint")); setText("quickAddTypeLabel", tr("type")); setText("quickAddOutLabel", tr("out")); setText("quickAddInLabel", tr("in")); setText("quickAddAmountLabel", tr("quickAddAmount")); setText("saveQuickAddBtn", tr("saveQuickAdd")); setText("openFullAddFromQuickBtn", tr("openFullAdd")); setText("closeQuickAddBtn", tr("close"));
-  setText("summaryTitle", tr("summaryTitle")); setText("summaryHint", tr("summaryHint")); setText("closeSummaryBtn", tr("close")); setText("summaryInLabel", tr("totalIn")); setText("summaryOutLabel", tr("totalOut")); setText("summaryBalanceLabel", tr("balanceLeft")); setText("summaryInGraphLabel", tr("totalIn")); setText("summaryOutGraphLabel", tr("totalOut"));
+  setText("calculatorTitle", tr("calculator")); setText("calculatorHint", tr("calculatorHint")); setText("useCalcAmountBtn", tr("useAmount")); setText("calcClearBtn", tr("calcClear")); setText("calcSignBtn", "±"); setText("calcPercentBtn", "%"); setText("diagnosticsTitle", tr("diagnostics")); setText("diagnosticsHint", tr("diagnosticsHint")); setText("diagnosticVersionLabel", tr("appVersion")); setText("diagnosticProfilesLabel", tr("profileCount")); setText("diagnosticRecordsLabel", tr("recordCount")); setText("diagnosticStorageLabel", tr("storageUsed")); setText("diagnosticWorkerLabel", tr("serviceWorker")); setText("diagnosticLastBackupLabel", tr("lastBackup")); setText("runDataCheckBtn", tr("runDataCheck")); setText("dataCheckHintText", tr("dataCheckHint")); setText("quickAddTitle", tr("quickAdd")); setText("quickAddHint", tr("quickAddHint")); setText("quickAddTypeLabel", tr("type")); setText("quickAddOutLabel", tr("out")); setText("quickAddInLabel", tr("in")); setText("quickAddAmountLabel", tr("quickAddAmount")); setText("saveQuickAddBtn", tr("saveQuickAdd")); setText("openFullAddFromQuickBtn", tr("openFullAdd")); setText("closeQuickAddBtn", tr("close"));
+  setText("summaryTitle", tr("summaryTitle")); setText("summaryHint", tr("summaryHint")); setText("closeSummaryBtn", tr("close")); setText("closeChoiceBtn", tr("close")); setText("summaryInLabel", tr("totalIn")); setText("summaryOutLabel", tr("totalOut")); setText("summaryBalanceLabel", tr("balanceLeft")); setText("summaryInGraphLabel", tr("totalIn")); setText("summaryOutGraphLabel", tr("totalOut"));
   setText("clearSelectionBtn", tr("clearSelection"));
   setText("profileSheetTitle", tr("profiles")); setText("profileHintText", tr("profileHint")); setText("closeProfileBtn", tr("close"));
   setText("manageProfilesText", tr("manageProfiles")); setText("addProfileBtn", tr("addProfile")); setText("allProfilesBackupText", tr("allProfilesBackup"));
@@ -1651,6 +1785,7 @@ function updateNavPill() {
 }
 
 function setPage(page, options = {}) {
+  closeChoiceSheet();
   const nextIndex = pageIndex(page);
   document.documentElement.style.setProperty("--page-slide", `${nextIndex >= previousPageIndex ? 16 : -16}px`);
   previousPageIndex = nextIndex;
@@ -2122,8 +2257,95 @@ function renderSettingsPage() {
   $$("[data-template-choice]").forEach(button => button.classList.toggle("active", button.dataset.templateChoice === settings.themeTemplate));
   renderCategoryManager();
   renderBudgetSettings();
+  renderDiagnostics();
 }
 
+
+function bytesToReadable(bytes = 0) {
+  const value = Math.max(0, Number(bytes) || 0);
+  if (value < 1024) return `${Math.round(value)} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(value < 10240 ? 1 : 0)} KB`;
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function estimatedLocalDataBytes() {
+  let bytes = 0;
+  [RECORD_KEY, SETTINGS_KEY, STATE_KEY, "wifeyMoneyRecords.liquid.v1"].forEach(key => {
+    const value = localStorage.getItem(key);
+    if (value) bytes += new Blob([value]).size;
+  });
+  return bytes;
+}
+
+async function renderDiagnostics() {
+  const version = $("#diagnosticVersion");
+  if (!version) return;
+  setText("diagnosticVersion", APP_VERSION);
+  setText("diagnosticProfiles", String((settings.profiles || []).length));
+  setText("diagnosticRecords", String(records.length));
+  setText("diagnosticLastBackup", displayDateTime(settings.lastBackupAt));
+
+  let usage = estimatedLocalDataBytes();
+  try {
+    const estimate = await navigator.storage?.estimate?.();
+    if (Number.isFinite(estimate?.usage)) usage = Math.max(usage, estimate.usage);
+  } catch (e) {}
+  setText("diagnosticStorage", bytesToReadable(usage));
+
+  let workerText = tr("unavailable");
+  if ("serviceWorker" in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      workerText = registration ? tr("ready") : tr("unavailable");
+    } catch (e) {}
+  }
+  setText("diagnosticWorker", workerText);
+}
+
+function runDataCheck() {
+  const issues = [];
+  const profileIds = new Set();
+  const recordIds = new Set();
+
+  (settings.profiles || []).forEach((profile, index) => {
+    if (!profile?.id) issues.push(`Profile ${index + 1}: missing ID`);
+    else if (profileIds.has(profile.id)) issues.push(`Profile ${index + 1}: duplicate ID`);
+    else profileIds.add(profile.id);
+
+    const categories = normalizeCategoryList(profile?.categories || []);
+    const categoryIds = new Set(categories.map(category => category.id));
+    if (!categoryIds.has("other")) issues.push(`${profile?.name || "Profile"}: missing Other category`);
+  });
+
+  records.forEach((record, index) => {
+    const label = record.description || `Record ${index + 1}`;
+    if (!record.id) issues.push(`${label}: missing ID`);
+    else if (recordIds.has(record.id)) issues.push(`${label}: duplicate ID`);
+    else recordIds.add(record.id);
+
+    const profileId = record.profileId || DEFAULT_PROFILE_ID;
+    const profile = profileById(profileId);
+    if (!profile) issues.push(`${label}: missing profile`);
+    if (!Number.isFinite(Number(record.amountUSD)) || Number(record.amountUSD) <= 0) issues.push(`${label}: invalid amount`);
+    if (!["In", "Out"].includes(record.type)) issues.push(`${label}: invalid type`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(record.date || ""))) issues.push(`${label}: invalid date`);
+    if (profile && categoryKeyForProfile(record.category, profileId) !== record.category) issues.push(`${label}: missing category`);
+  });
+
+  const result = $("#dataCheckResult");
+  if (!result) return issues;
+  result.classList.remove("clean", "has-issues");
+  if (!issues.length) {
+    result.classList.add("clean");
+    result.innerHTML = `<strong>${escapeHTML(tr("dataCheckClean"))}</strong>`;
+  } else {
+    result.classList.add("has-issues");
+    const visible = issues.slice(0, 8);
+    result.innerHTML = `<strong>${escapeHTML(tr("dataCheckIssues", { count: issues.length }))}</strong><ul>${visible.map(issue => `<li>${escapeHTML(issue)}</li>`).join("")}</ul>${issues.length > visible.length ? `<small>+${issues.length - visible.length} more</small>` : ""}`;
+  }
+  hapticTick(issues.length ? 16 : 8);
+  return issues;
+}
 function renderSharedPolish() {
   renderLanguageButton();
   renderProfileButton();
@@ -2262,17 +2484,49 @@ async function copyBalance() {
 function resetCalc() {
   calcState.current = "0";
   calcState.stored = null;
+  calcState.storedRaw = "0";
   calcState.operator = null;
   calcState.fresh = true;
+  calcState.trail = "";
+  calcState.lastOperator = null;
+  calcState.lastOperand = null;
+  calcState.lastOperandRaw = "0";
+  calcState.justEvaluated = false;
+  calcState.error = false;
+  calcState.enteredSecondOperand = false;
   updateCalcDisplay();
+}
+
+function clearCalc() {
+  if (calcState.error || calcState.justEvaluated) {
+    resetCalc();
+    return;
+  }
+  if (!calcState.fresh && calcState.current !== "0") {
+    calcState.current = "0";
+    calcState.fresh = true;
+    if (calcState.operator) calcState.enteredSecondOperand = false;
+    updateCalcDisplay();
+    return;
+  }
+  resetCalc();
 }
 
 function openCalculator() {
   calcState.currency = settings.displayCurrency;
-  calcState.current = $("#amountInput").value || "0";
+  const existing = String($("#amountInput")?.value || "").trim();
+  calcState.current = existing ? normalizeCalcInput(existing, calcState.currency) : "0";
   calcState.stored = null;
+  calcState.storedRaw = "0";
   calcState.operator = null;
   calcState.fresh = true;
+  calcState.trail = "";
+  calcState.lastOperator = null;
+  calcState.lastOperand = null;
+  calcState.lastOperandRaw = "0";
+  calcState.justEvaluated = false;
+  calcState.error = false;
+  calcState.enteredSecondOperand = false;
   showSheet("#calculatorBackdrop");
   updateCalcDisplay();
 }
@@ -2286,76 +2540,242 @@ function calcNumber() {
   return Number.isFinite(value) ? value : 0;
 }
 
+function normalizeCalcInput(value, currency = calcState.currency) {
+  let raw = String(value ?? "0").trim().replace(/,/g, "");
+  if (!raw || raw === "-" || raw === "." || raw === "-.") return raw.startsWith("-") ? "-0" : "0";
+  if (currency === "KHR") return String(Math.round(Number(raw) || 0));
+  const negative = raw.startsWith("-");
+  if (negative) raw = raw.slice(1);
+  const hasDot = raw.includes(".");
+  let [whole = "0", fraction = ""] = raw.split(".");
+  whole = whole.replace(/[^0-9]/g, "").replace(/^0+(?=\d)/, "") || "0";
+  fraction = fraction.replace(/[^0-9]/g, "").slice(0, 8);
+  return `${negative ? "-" : ""}${whole}${hasDot ? `.${fraction}` : ""}`;
+}
+
+function normalizeCalcResult(value, currency = calcState.currency) {
+  if (!Number.isFinite(Number(value))) return "0";
+  if (currency === "KHR") return String(Math.round(Number(value)));
+  const rounded = Math.round((Number(value) + Number.EPSILON) * 100000000) / 100000000;
+  return Object.is(rounded, -0) ? "0" : String(rounded);
+}
+
+function formatCalcMoney(rawValue, currency = calcState.currency) {
+  let raw = normalizeCalcInput(rawValue, currency);
+  if (!raw || raw === "-") raw = "0";
+  if (currency === "KHR") {
+    const value = Math.round(Number(raw) || 0);
+    return `${currencyInfo("KHR").symbol}${value.toLocaleString(settings.language === "km" ? "km-KH" : "en-US")}`;
+  }
+
+  const negative = raw.startsWith("-");
+  if (negative) raw = raw.slice(1);
+  const hasDot = raw.includes(".");
+  let [whole = "0", fraction = ""] = raw.split(".");
+  whole = whole.replace(/^0+(?=\d)/, "") || "0";
+  const numericWhole = Number(whole || 0);
+  const grouped = Number.isFinite(numericWhole) ? numericWhole.toLocaleString("en-US", { maximumFractionDigits: 0 }) : "0";
+  const decimal = hasDot ? `.${fraction}` : "";
+  return `${negative ? "-" : ""}$${grouped}${decimal}`;
+}
+
+function formatCalcTrailValue(rawValue) {
+  return formatCalcMoney(rawValue, calcState.currency);
+}
+
+function currentCalcDisplayRaw() {
+  return calcState.currency === "KHR" ? normalizeCalcResult(calcNumber(), "KHR") : normalizeCalcInput(calcState.current, "USD");
+}
+
 function updateCalcDisplay() {
   const currency = calcState.currency;
-  $$("[data-calc-currency]").forEach(button => button.classList.toggle("active", button.dataset.calcCurrency === currency));
+  $$('[data-calc-currency]').forEach(button => button.classList.toggle("active", button.dataset.calcCurrency === currency));
+  $$('[data-calc-op]').forEach(button => button.classList.toggle("active", Boolean(calcState.operator && calcState.fresh && button.dataset.calcOp === calcState.operator)));
+
   const dot = $("#calcDotBtn");
   if (dot) dot.disabled = currency === "KHR";
-  const value = currency === "KHR" ? Math.round(calcNumber()) : calcNumber();
-  $("#calcDisplay").textContent = formatRawMoney(value, currency);
+  const display = $("#calcDisplay");
+  if (display) display.textContent = calcState.error ? tr("calcError") : formatCalcMoney(currentCalcDisplayRaw(), currency);
+  const trail = $("#calcTrail") || $("#calcExpression");
+  if (trail) {
+    trail.textContent = calcState.trail || " ";
+    trail.classList.toggle("has-value", Boolean(calcState.trail));
+  }
+  const clear = $("#calcClearBtn") || $("[data-calc-clear]");
+  if (clear) {
+    const canClearEntry = calcState.error || calcState.justEvaluated || !calcState.fresh || calcState.current !== "0";
+    clear.textContent = canClearEntry ? "C" : "AC";
+  }
+}
+
+function beginCalcEntry(raw) {
+  calcState.current = normalizeCalcInput(raw, calcState.currency);
+  calcState.fresh = false;
+  calcState.justEvaluated = false;
+  if (calcState.operator) calcState.enteredSecondOperand = true;
 }
 
 function inputCalcDigit(digit) {
-  if (calcState.fresh || calcState.current === "0") {
-    calcState.current = String(digit);
-    calcState.fresh = false;
+  if (calcState.error) resetCalc();
+  const cleanDigit = String(digit).replace(/\D/g, "").slice(0, 1) || "0";
+
+  if (calcState.justEvaluated || calcState.fresh) {
+    const prefix = calcState.current === "-0" ? "-" : "";
+    beginCalcEntry(`${prefix}${cleanDigit}`);
   } else {
-    calcState.current += String(digit);
+    const digitCount = calcState.current.replace(/[^0-9]/g, "").length;
+    if (digitCount >= 12) return;
+    if (calcState.current === "0") calcState.current = cleanDigit;
+    else if (calcState.current === "-0") calcState.current = `-${cleanDigit}`;
+    else calcState.current += cleanDigit;
+    calcState.current = normalizeCalcInput(calcState.current, calcState.currency);
   }
   updateCalcDisplay();
 }
 
 function inputCalcDot() {
+  if (calcState.error) resetCalc();
   if (calcState.currency === "KHR") return;
-  if (calcState.fresh) {
-    calcState.current = "0.";
-    calcState.fresh = false;
+  if (calcState.justEvaluated || calcState.fresh) {
+    const prefix = calcState.current === "-0" ? "-" : "";
+    beginCalcEntry(`${prefix}0.`);
   } else if (!calcState.current.includes(".")) {
-    calcState.current += ".";
+    calcState.current = `${calcState.current}.`;
   }
   updateCalcDisplay();
 }
 
-function applyCalcOperation() {
-  const current = calcNumber();
-  if (calcState.stored === null || !calcState.operator) return current;
-  if (calcState.operator === "+") return calcState.stored + current;
-  if (calcState.operator === "-") return calcState.stored - current;
-  if (calcState.operator === "×") return calcState.stored * current;
-  if (calcState.operator === "÷") return current === 0 ? calcState.stored : calcState.stored / current;
-  return current;
+function calculatePair(left, operator, right) {
+  if (operator === "+") return left + right;
+  if (operator === "-") return left - right;
+  if (operator === "×") return left * right;
+  if (operator === "÷") return right === 0 ? null : left / right;
+  return right;
 }
 
 function chooseCalcOperator(operator) {
-  calcState.stored = applyCalcOperation();
-  calcState.current = String(calcState.stored);
+  if (calcState.error) resetCalc();
+  const currentRaw = currentCalcDisplayRaw();
+  const current = Number(currentRaw || 0);
+
+  if (calcState.operator && calcState.fresh && !calcState.enteredSecondOperand) {
+    calcState.operator = operator;
+    calcState.trail = `${formatCalcTrailValue(calcState.storedRaw)} ${operator}`;
+    updateCalcDisplay();
+    return;
+  }
+
+  if (calcState.operator && calcState.stored !== null && calcState.enteredSecondOperand) {
+    const result = calculatePair(calcState.stored, calcState.operator, current);
+    if (result === null) {
+      calcState.error = true;
+      calcState.trail = `${formatCalcTrailValue(calcState.storedRaw)} ${calcState.operator} ${formatCalcTrailValue(currentRaw)} =`;
+      calcState.operator = null;
+      calcState.stored = null;
+      calcState.fresh = true;
+      updateCalcDisplay();
+      return;
+    }
+    calcState.current = normalizeCalcResult(result);
+    calcState.stored = Number(calcState.current);
+    calcState.storedRaw = calcState.current;
+  } else {
+    calcState.stored = current;
+    calcState.storedRaw = currentRaw;
+  }
+
   calcState.operator = operator;
   calcState.fresh = true;
+  calcState.enteredSecondOperand = false;
+  calcState.justEvaluated = false;
+  calcState.lastOperator = null;
+  calcState.lastOperand = null;
+  calcState.lastOperandRaw = "0";
+  calcState.trail = `${formatCalcTrailValue(calcState.storedRaw)} ${operator}`;
   updateCalcDisplay();
 }
 
 function calcEquals() {
-  const result = applyCalcOperation();
-  calcState.current = String(result);
-  calcState.stored = null;
-  calcState.operator = null;
-  calcState.fresh = true;
+  if (calcState.operator && calcState.stored !== null) {
+    const useStoredAsOperand = calcState.fresh && !calcState.enteredSecondOperand;
+    const operandRaw = useStoredAsOperand ? calcState.storedRaw : currentCalcDisplayRaw();
+    const operand = useStoredAsOperand ? calcState.stored : Number(operandRaw || 0);
+    const left = calcState.stored;
+    const leftRaw = calcState.storedRaw;
+    const operator = calcState.operator;
+    const result = calculatePair(left, operator, operand);
+    if (result === null) {
+      calcState.error = true;
+      calcState.trail = `${formatCalcTrailValue(leftRaw)} ${operator} ${formatCalcTrailValue(operandRaw)} =`;
+      calcState.stored = null;
+      calcState.operator = null;
+      calcState.fresh = true;
+      updateCalcDisplay();
+      return;
+    }
+    calcState.current = normalizeCalcResult(result);
+    calcState.trail = `${formatCalcTrailValue(leftRaw)} ${operator} ${formatCalcTrailValue(operandRaw)} =`;
+    calcState.lastOperator = operator;
+    calcState.lastOperand = operand;
+    calcState.lastOperandRaw = operandRaw;
+    calcState.stored = null;
+    calcState.storedRaw = "0";
+    calcState.operator = null;
+    calcState.fresh = true;
+    calcState.enteredSecondOperand = false;
+    calcState.justEvaluated = true;
+    updateCalcDisplay();
+    return;
+  }
+
+  if (calcState.justEvaluated && calcState.lastOperator && calcState.lastOperand !== null) {
+    const leftRaw = currentCalcDisplayRaw();
+    const left = Number(leftRaw || 0);
+    const result = calculatePair(left, calcState.lastOperator, calcState.lastOperand);
+    if (result === null) { calcState.error = true; updateCalcDisplay(); return; }
+    calcState.current = normalizeCalcResult(result);
+    calcState.trail = `${formatCalcTrailValue(leftRaw)} ${calcState.lastOperator} ${formatCalcTrailValue(calcState.lastOperandRaw)} =`;
+    calcState.fresh = true;
+    updateCalcDisplay();
+  }
+}
+
+function calcToggleSign() {
+  if (calcState.error) resetCalc();
+  if (calcState.justEvaluated) calcState.justEvaluated = false;
+  if (calcState.fresh && calcState.operator && !calcState.enteredSecondOperand) {
+    calcState.current = "-0";
+    calcState.fresh = false;
+    calcState.enteredSecondOperand = true;
+    updateCalcDisplay();
+    return;
+  }
+  if (calcState.current === "0") return;
+  calcState.current = calcState.current.startsWith("-") ? calcState.current.slice(1) : `-${calcState.current}`;
+  calcState.current = normalizeCalcInput(calcState.current, calcState.currency);
+  if (calcState.operator) calcState.enteredSecondOperand = true;
   updateCalcDisplay();
 }
 
-function calcBackspace() {
-  if (calcState.fresh || calcState.current.length <= 1) {
-    calcState.current = "0";
-    calcState.fresh = true;
-  } else {
-    calcState.current = calcState.current.slice(0, -1);
+function calcPercent() {
+  if (calcState.error) resetCalc();
+  const current = calcNumber();
+  let value = current / 100;
+  if (calcState.operator && calcState.stored !== null && ["+", "-"].includes(calcState.operator)) {
+    value = calcState.stored * current / 100;
   }
+  calcState.current = normalizeCalcResult(value);
+  calcState.fresh = false;
+  calcState.justEvaluated = false;
+  if (calcState.operator) calcState.enteredSecondOperand = true;
   updateCalcDisplay();
 }
 
 function useCalculatorAmount() {
-  calcEquals();
-  const amount = calcState.currency === "KHR" ? Math.max(0, Math.round(calcNumber())) : Math.max(0, Number(calcNumber().toFixed(2)));
+  if (calcState.error) { showToast(tr("enterValidAmount")); return; }
+  if (calcState.operator && calcState.enteredSecondOperand) calcEquals();
+  if (calcState.error) { showToast(tr("enterValidAmount")); return; }
+  const amount = calcState.currency === "KHR" ? Math.max(0, Math.round(calcNumber())) : Math.max(0, Number(normalizeCalcResult(calcNumber(), "USD")));
   settings.displayCurrency = calcState.currency;
   saveSettings();
   $("#amountInput").value = amount ? String(amount) : "";
@@ -2363,7 +2783,6 @@ function useCalculatorAmount() {
   saveState();
   closeCalculator();
 }
-
 
 
 function quickAddPresets() {
@@ -2458,7 +2877,7 @@ function daysSinceISO(iso) {
 }
 
 function recordsSinceLastBackup() {
-  return Math.max(0, records.length - Number(settings.lastBackupRecordCount || 0));
+  return Math.max(0, Number(settings.backupChangeCount || 0));
 }
 
 function backupReminderDue() {
@@ -2488,13 +2907,18 @@ function dismissBackupReminder() {
 
 function exportBackup() {
   saveState();
-  saveSettings();
-  const data = { app: "DollarTracker", version: APP_VERSION, exportedAt: new Date().toISOString(), settings, records };
+  const exportedAt = new Date().toISOString();
+  const exportedSettings = { ...settings, lastBackupAt: exportedAt, lastBackupRecordCount: records.length, backupChangeCount: 0, backupReminderDismissedAt: "" };
+  const data = { app: "DollarTracker", version: APP_VERSION, exportedAt, settings: exportedSettings, records };
   downloadFile(`dollartracker-backup-${todayISO()}.json`, JSON.stringify(data, null, 2), "application/json");
-  settings.lastBackupAt = new Date().toISOString();
+  const previousSuppress = suppressChangeTracking;
+  suppressChangeTracking = true;
+  settings.lastBackupAt = exportedAt;
   settings.lastBackupRecordCount = records.length;
+  settings.backupChangeCount = 0;
   settings.backupReminderDismissedAt = "";
   saveSettings();
+  suppressChangeTracking = previousSuppress;
   render();
   showToast(tr("backupExported"));
 }
@@ -2941,6 +3365,13 @@ async function switchLanguageSmooth() {
 }
 
 function initEvents() {
+  bindChoiceSelects();
+  $("#closeChoiceBtn")?.addEventListener("click", closeChoiceSheet);
+  $("#choiceBackdrop")?.addEventListener("click", event => { if (event.target.id === "choiceBackdrop") closeChoiceSheet(); });
+  $("#choiceList")?.addEventListener("click", event => {
+    const option = event.target.closest("[data-choice-value]");
+    if (option) chooseChoiceValue(option.dataset.choiceValue);
+  });
   document.addEventListener("selectionchange", () => {
     const selection = window.getSelection?.();
     if (!selection || !selection.rangeCount || selection.isCollapsed) return;
@@ -3175,15 +3606,27 @@ function initEvents() {
   });
   $$("[data-calc-currency]").forEach(button => button.addEventListener("click", () => {
     calcState.currency = button.dataset.calcCurrency === "KHR" ? "KHR" : "USD";
-    if (calcState.currency === "KHR") calcState.current = String(Math.round(calcNumber()));
+    calcState.current = normalizeCalcResult(calcNumber(), calcState.currency);
+    calcState.stored = null;
+    calcState.storedRaw = "0";
+    calcState.operator = null;
+    calcState.trail = "";
+    calcState.fresh = true;
+    calcState.enteredSecondOperand = false;
+    calcState.lastOperator = null;
+    calcState.lastOperand = null;
+    calcState.lastOperandRaw = "0";
+    calcState.justEvaluated = false;
+    calcState.error = false;
     updateCalcDisplay();
     updateCurrencySwitchPill();
   }));
   $$("[data-calc-num]").forEach(button => button.addEventListener("click", () => inputCalcDigit(button.dataset.calcNum)));
   $$("[data-calc-op]").forEach(button => button.addEventListener("click", () => chooseCalcOperator(button.dataset.calcOp)));
   $("[data-calc-dot]").addEventListener("click", inputCalcDot);
-  $("[data-calc-clear]").addEventListener("click", resetCalc);
-  $("[data-calc-back]").addEventListener("click", calcBackspace);
+  $("[data-calc-clear]").addEventListener("click", clearCalc);
+  $("[data-calc-sign]").addEventListener("click", calcToggleSign);
+  $("[data-calc-percent]").addEventListener("click", calcPercent);
   $("[data-calc-equals]").addEventListener("click", calcEquals);
   $("#useCalcAmountBtn").addEventListener("click", useCalculatorAmount);
   $("#editCurrencyInput").addEventListener("change", updateEditAmountInputMode);
@@ -3194,6 +3637,8 @@ function initEvents() {
   $("#exportBackupBtn").addEventListener("click", exportBackup);
   $("#exportCsvBtn").addEventListener("click", exportCSV);
   $("#importBackupInput").addEventListener("change", event => importBackup(event.target.files[0]));
+  $("#runDataCheckBtn")?.addEventListener("click", runDataCheck);
+
   $("#saveSettingsBtn").addEventListener("click", () => {
     const rate = Number($("#exchangeRateInput").value);
     settings.exchangeRate = rate > 0 ? rate : 4000;
@@ -3267,6 +3712,7 @@ function boot() {
 
   render({ translate: true });
   registerServiceWorker();
+  appBooted = true;
 }
 
 boot();

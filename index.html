@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800;900&family=Noto+Sans+Khmer:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3.9.3" />
+  <link rel="stylesheet" href="styles.css?v=3.9.5" />
 </head>
 <body>
   <div class="aurora-bg" aria-hidden="true">
@@ -323,6 +323,32 @@
           </details>
         </section>
 
+        <section class="panel glass settings-collapse-panel diagnostics-panel">
+          <details class="settings-collapse">
+            <summary>
+              <div class="section-title">
+                <h3 id="diagnosticsTitle">Diagnostics</h3>
+                <p class="hint" id="diagnosticsHint">Quick health check for this local app.</p>
+              </div>
+              <span class="collapse-arrow" aria-hidden="true">⌄</span>
+            </summary>
+
+            <div class="settings-collapse-body">
+              <div class="diagnostic-grid" id="diagnosticsList">
+                <article><span id="diagnosticVersionLabel">App version</span><strong id="diagnosticVersion">—</strong></article>
+                <article><span id="diagnosticProfilesLabel">Profiles</span><strong id="diagnosticProfiles">—</strong></article>
+                <article><span id="diagnosticRecordsLabel">Records</span><strong id="diagnosticRecords">—</strong></article>
+                <article><span id="diagnosticStorageLabel">Storage used</span><strong id="diagnosticStorage">—</strong></article>
+                <article><span id="diagnosticWorkerLabel">Offline app</span><strong id="diagnosticWorker">—</strong></article>
+                <article><span id="diagnosticLastBackupLabel">Last backup</span><strong id="diagnosticLastBackup">—</strong></article>
+              </div>
+              <p class="hint diagnostic-check-hint" id="dataCheckHintText">This check does not modify your data.</p>
+              <div class="data-check-result" id="dataCheckResult"></div>
+              <button class="secondary-button full compact-button" type="button" id="runDataCheckBtn">Run Data Check</button>
+            </div>
+          </details>
+        </section>
+
         <section class="panel glass danger-panel">
           <h3 id="dangerZoneTitle">Danger Zone</h3>
           <p class="hint" id="dangerHintText">Tap twice to clear records for the active profile only.</p>
@@ -535,6 +561,19 @@
       </section>
     </div>
 
+    <div class="choice-sheet-backdrop" id="choiceBackdrop">
+      <section class="choice-sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="choiceSheetTitle">
+        <div class="panel-head">
+          <div>
+            <h3 id="choiceSheetTitle">Choose</h3>
+            <p class="hint" id="choiceSheetHint">Select one option.</p>
+          </div>
+          <button class="ghost-button" type="button" id="closeChoiceBtn">Close</button>
+        </div>
+        <div class="choice-list" id="choiceList"></div>
+      </section>
+    </div>
+
     <div class="calculator-backdrop" id="calculatorBackdrop">
       <section class="calculator-sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="calculatorTitle">
         <div class="panel-head">
@@ -548,32 +587,30 @@
           <button type="button" class="calc-currency-btn active" data-calc-currency="USD">USD</button>
           <button type="button" class="calc-currency-btn" data-calc-currency="KHR">KHR</button>
         </div>
-        <div class="calc-display" id="calcDisplay">0</div>
-        <div class="calc-grid">
-          <button type="button" data-calc-clear="true">C</button>
-          <button type="button" class="calc-icon-key" data-calc-back="true" aria-label="Delete last digit">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M21 5.5v13a2 2 0 0 1-2 2H9.4a2 2 0 0 1-1.5-.68L2.8 14a3 3 0 0 1 0-4l5.1-5.82a2 2 0 0 1 1.5-.68H19a2 2 0 0 1 2 2Z"></path>
-              <path d="M10.7 9.2l4.6 4.6"></path>
-              <path d="M15.3 9.2l-4.6 4.6"></path>
-            </svg>
-          </button>
-          <button type="button" data-calc-op="÷">÷</button>
-          <button type="button" data-calc-op="×">×</button>
+        <div class="calc-display-shell">
+          <div class="calc-trail" id="calcTrail" aria-live="polite">&nbsp;</div>
+          <div class="calc-display" id="calcDisplay">$0</div>
+        </div>
+        <div class="calc-grid ios-calc-grid">
+          <button type="button" class="calc-function-key" data-calc-clear="true" id="calcClearBtn">AC</button>
+          <button type="button" class="calc-function-key" data-calc-sign="true" id="calcSignBtn">±</button>
+          <button type="button" class="calc-function-key" data-calc-percent="true" id="calcPercentBtn">%</button>
+          <button type="button" class="calc-operator-key" data-calc-op="÷">÷</button>
           <button type="button" data-calc-num="7">7</button>
           <button type="button" data-calc-num="8">8</button>
           <button type="button" data-calc-num="9">9</button>
-          <button type="button" data-calc-op="-">−</button>
+          <button type="button" class="calc-operator-key" data-calc-op="×">×</button>
           <button type="button" data-calc-num="4">4</button>
           <button type="button" data-calc-num="5">5</button>
           <button type="button" data-calc-num="6">6</button>
-          <button type="button" data-calc-op="+">+</button>
+          <button type="button" class="calc-operator-key" data-calc-op="-">−</button>
           <button type="button" data-calc-num="1">1</button>
           <button type="button" data-calc-num="2">2</button>
           <button type="button" data-calc-num="3">3</button>
-          <button type="button" data-calc-equals="true">=</button>
+          <button type="button" class="calc-operator-key" data-calc-op="+">+</button>
           <button type="button" data-calc-num="0" class="span-two">0</button>
           <button type="button" data-calc-dot="true" id="calcDotBtn">.</button>
+          <button type="button" class="calc-operator-key calc-equals-key" data-calc-equals="true">=</button>
           <button type="button" class="use-amount-btn" id="useCalcAmountBtn">Use Amount</button>
         </div>
       </section>
@@ -581,6 +618,6 @@
 
     <div class="toast glass-strong" id="toast"></div>
   </div>
-  <script src="app.js?v=3.9.3"></script>
+  <script src="app.js?v=3.9.5"></script>
 </body>
 </html>
