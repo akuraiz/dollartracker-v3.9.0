@@ -2266,3 +2266,122 @@ html.thermal-lite[data-theme=dark] .choice-option,
 html.thermal-lite[data-theme=dark] .profile-option{
   background:rgba(30,35,44,.96) !important;
 }
+
+
+/* ===========================================================================
+   v3.9.11 — Balanced Liquid Glass Restoration
+   Bring back the old liquid-glass feeling while keeping the Safari/iPhone
+   optimization wins: no continuous orbs, lighter blur radii, and calmer GPU use.
+=========================================================================== */
+html[data-theme=dark] .glass,
+html[data-theme=dark] .glass-lite,
+html[data-theme=dark] .glass-strong,
+html[data-theme=dark] .quick-card,
+html[data-theme=dark] .record-card-body,
+html[data-theme=dark] .profile-manager-row,
+html[data-theme=dark] .selection-summary-bar,
+html[data-theme=dark] .profile-sheet,
+html[data-theme=dark] .summary-sheet,
+html[data-theme=dark] .edit-sheet,
+html[data-theme=dark] .calculator-sheet,
+html[data-theme=dark] .filter-sheet,
+html[data-theme=dark] .quick-add-sheet,
+html[data-theme=dark] .choice-sheet{
+  background:
+    linear-gradient(155deg, rgba(33,39,50,.52), rgba(21,25,33,.42)) !important;
+  backdrop-filter:blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter:blur(16px) saturate(150%) !important;
+  box-shadow:0 12px 30px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+html[data-theme=dark] .topbar,
+html[data-theme=dark] .bottom-nav{
+  background:linear-gradient(155deg, rgba(38,44,56,.62), rgba(24,29,37,.50)) !important;
+  backdrop-filter:blur(18px) saturate(155%) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(155%) !important;
+  box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.14) !important;
+}
+html[data-theme=dark] input,
+html[data-theme=dark] textarea,
+html[data-theme=dark] select,
+html[data-theme=dark] .amount-wrap,
+html[data-theme=dark] .calc-display-shell,
+html[data-theme=dark] .choice-option,
+html[data-theme=dark] .profile-option{
+  background:rgba(255,255,255,.11) !important;
+  border-color:rgba(255,255,255,.10) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10), 0 8px 18px rgba(0,0,0,.08) !important;
+  backdrop-filter:blur(10px) saturate(135%) !important;
+  -webkit-backdrop-filter:blur(10px) saturate(135%) !important;
+}
+html[data-theme=dark] .choice-option.active,
+html[data-theme=dark] .profile-option.active{
+  background:linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.10)) !important;
+}
+html[data-theme=dark] .calculator-backdrop,
+html[data-theme=dark] .summary-sheet-backdrop,
+html[data-theme=dark] .edit-sheet-backdrop,
+html[data-theme=dark] .filter-sheet-backdrop,
+html[data-theme=dark] .quick-add-backdrop,
+html[data-theme=dark] .profile-sheet-backdrop{
+  background:rgba(4,8,14,.42) !important;
+}
+
+/* iPhone / Safari balanced mode: still glass, but noticeably lighter than the
+   original heavy build to delay heating. */
+html.thermal-lite[data-theme=dark] .glass,
+html.thermal-lite[data-theme=dark] .glass-lite,
+html.thermal-lite[data-theme=dark] .glass-strong,
+html.thermal-lite[data-theme=dark] .quick-card,
+html.thermal-lite[data-theme=dark] .record-card-body,
+html.thermal-lite[data-theme=dark] .selection-summary-bar,
+html.thermal-lite[data-theme=dark] .profile-sheet,
+html.thermal-lite[data-theme=dark] .summary-sheet,
+html.thermal-lite[data-theme=dark] .edit-sheet,
+html.thermal-lite[data-theme=dark] .calculator-sheet,
+html.thermal-lite[data-theme=dark] .filter-sheet,
+html.thermal-lite[data-theme=dark] .quick-add-sheet{
+  background:linear-gradient(155deg, rgba(33,39,50,.62), rgba(20,24,31,.54)) !important;
+  backdrop-filter:blur(10px) saturate(128%) !important;
+  -webkit-backdrop-filter:blur(10px) saturate(128%) !important;
+  box-shadow:0 8px 20px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+html.thermal-lite[data-theme=dark] .topbar,
+html.thermal-lite[data-theme=dark] .bottom-nav{
+  background:linear-gradient(155deg, rgba(38,44,56,.68), rgba(23,28,35,.58)) !important;
+  backdrop-filter:blur(12px) saturate(132%) !important;
+  -webkit-backdrop-filter:blur(12px) saturate(132%) !important;
+  box-shadow:0 8px 18px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+html.thermal-lite[data-theme=dark] input,
+html.thermal-lite[data-theme=dark] textarea,
+html.thermal-lite[data-theme=dark] select,
+html.thermal-lite[data-theme=dark] .amount-wrap,
+html.thermal-lite[data-theme=dark] .calc-display-shell,
+html.thermal-lite[data-theme=dark] .choice-option,
+html.thermal-lite[data-theme=dark] .profile-option{
+  background:rgba(255,255,255,.10) !important;
+  backdrop-filter:blur(7px) saturate(120%) !important;
+  -webkit-backdrop-filter:blur(7px) saturate(120%) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 6px 12px rgba(0,0,0,.06) !important;
+}
+html.thermal-lite[data-theme=dark] .calculator-backdrop,
+html.thermal-lite[data-theme=dark] .summary-sheet-backdrop,
+html.thermal-lite[data-theme=dark] .edit-sheet-backdrop,
+html.thermal-lite[data-theme=dark] .filter-sheet-backdrop,
+html.thermal-lite[data-theme=dark] .quick-add-backdrop,
+html.thermal-lite[data-theme=dark] .profile-sheet-backdrop{
+  background:rgba(4,8,14,.34) !important;
+}
+/* Keep thermal wins */
+html.thermal-lite .aurora-bg,
+html.thermal-lite .orb{display:none !important;}
+html.thermal-lite .balance-hero:after{display:none !important;}
+html.thermal-lite .page.active,
+html.thermal-lite .record-card,
+html.thermal-lite .profile-sheet,
+html.thermal-lite .summary-sheet,
+html.thermal-lite .edit-sheet,
+html.thermal-lite .calculator-sheet,
+html.thermal-lite .filter-sheet,
+html.thermal-lite .quick-add-sheet,
+html.thermal-lite .selection-summary-bar{animation:none !important;filter:none !important;}

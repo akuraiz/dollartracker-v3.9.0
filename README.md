@@ -488,3 +488,10 @@ No storage schema change. No money logic changes beyond preserving historical KH
 - Reduced dark-mode translucency across calculator, sheets, cards, and form controls so content is easier to read on iPhone.
 - Restored native iOS picker behavior for dropdown fields instead of the custom category choice sheet.
 - Strengthened dark backdrop overlays while keeping Safari thermal optimization.
+
+
+## v3.9.11 Balanced Liquid Glass Restoration
+
+- Restored the original liquid-glass feel in dark mode instead of the heavy opaque black look.
+- Kept native iOS pickers.
+- Preserved the Safari thermal optimizations that matter most: no continuous orb animation, lower blur radii, lighter shadows, and calmer GPU activity.
