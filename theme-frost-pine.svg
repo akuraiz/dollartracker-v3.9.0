@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="120" viewBox="0 0 220 120" fill="none" shape-rendering="geometricPrecision">
+  <defs>
+    <linearGradient id="snow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.97"/>
+      <stop offset="1" stop-color="#EAF3FF" stop-opacity="0.93"/>
+    </linearGradient>
+    <linearGradient id="pine1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A7D98D"/>
+      <stop offset="0.45" stop-color="#4E8E46"/>
+      <stop offset="1" stop-color="#183C22"/>
+    </linearGradient>
+    <linearGradient id="wire" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#806A45"/>
+      <stop offset="1" stop-color="#5D4D35"/>
+    </linearGradient>
+    <radialGradient id="bulbWarm" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) rotate(90) scale(10)">
+      <stop offset="0" stop-color="#FFF9DB"/>
+      <stop offset="0.5" stop-color="#FFD989"/>
+      <stop offset="1" stop-color="#FFC04D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bulbGlassA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF2A4"/>
+      <stop offset="1" stop-color="#D59D31"/>
+    </linearGradient>
+    <linearGradient id="bulbGlassB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF7C3"/>
+      <stop offset="1" stop-color="#E0B255"/>
+    </linearGradient>
+    <filter id="lightGlow" x="0" y="0" width="220" height="120">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+    <filter id="softShadow" x="0" y="0" width="220" height="120">
+      <feDropShadow dx="0" dy="3" stdDeviation="1.4" flood-color="#031009" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- snow pile resting on card edge -->
+  <g filter="url(#softShadow)">
+    <path d="M30 14c10 0 16 7 21 10 4-8 13-13 23-13 14 0 20 9 24 13 4-8 14-13 25-13 12 0 19 7 23 12 4-4 9-7 17-7 12 0 23 7 27 18H22c1-12 8-20 18-20Z" fill="url(#snow)"/>
+    <path d="M22 34h168c-2 7-7 11-15 11H37c-8 0-13-4-15-11Z" fill="#EEF5FD" fill-opacity="0.9"/>
+  </g>
+
+  <!-- subtle snow sparkles -->
+  <g fill="#F9FDFF" fill-opacity="0.95">
+    <circle cx="38" cy="8" r="1.8"/>
+    <circle cx="66" cy="4" r="1.6"/>
+    <circle cx="117" cy="5" r="1.6"/>
+    <circle cx="156" cy="9" r="1.7"/>
+    <circle cx="180" cy="13" r="1.4"/>
+  </g>
+
+  <!-- pine garland under snow -->
+  <g filter="url(#softShadow)">
+    <path d="M46 35c25-11 65-11 123 0" stroke="#234E2C" stroke-width="5" stroke-linecap="round"/>
+    <g stroke="url(#pine1)" stroke-width="2.1" stroke-linecap="round">
+      <path d="M54 37l-14 -7"/><path d="M62 35l-13 -11"/><path d="M70 34l-12 -14"/><path d="M78 33l-12 -14"/><path d="M87 32l-11 -14"/><path d="M96 31l-11 -13"/><path d="M106 31l-10 -13"/><path d="M116 31l-10 -12"/><path d="M126 31l-9 -11"/><path d="M136 32l-9 -11"/><path d="M146 33l-8 -10"/><path d="M156 35l-8 -10"/>
+      <path d="M53 39l-14 8"/><path d="M63 38l-14 10"/><path d="M73 37l-13 10"/><path d="M83 36l-12 11"/><path d="M94 35l-12 11"/><path d="M105 35l-11 10"/><path d="M116 35l-10 10"/><path d="M127 36l-10 9"/><path d="M139 37l-9 9"/><path d="M151 38l-8 8"/>
+    </g>
+  </g>
+
+  <!-- fairy light wire -->
+  <path d="M50 40c20 6 46 9 82 7 18-1 28-4 42-7" stroke="url(#wire)" stroke-width="1.7" stroke-linecap="round" opacity="0.86"/>
+
+  <!-- hanging bulbs with glow -->
+  <g filter="url(#lightGlow)" opacity="0.85">
+    <circle cx="82" cy="51" r="12" fill="url(#bulbWarm)"/>
+    <circle cx="106" cy="55" r="12" fill="url(#bulbWarm)"/>
+    <circle cx="130" cy="50" r="11" fill="url(#bulbWarm)"/>
+    <circle cx="153" cy="54" r="12" fill="url(#bulbWarm)"/>
+  </g>
+  <g filter="url(#softShadow)">
+    <path d="M82 41v7" stroke="#7E6B45" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M106 43v8" stroke="#7E6B45" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M130 40v7" stroke="#7E6B45" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M153 43v8" stroke="#7E6B45" stroke-width="1.3" stroke-linecap="round"/>
+
+    <rect x="79.6" y="46" width="4.8" height="3" rx="1.2" fill="#74643F"/>
+    <rect x="103.6" y="49" width="4.8" height="3" rx="1.2" fill="#74643F"/>
+    <rect x="127.6" y="45" width="4.8" height="3" rx="1.2" fill="#74643F"/>
+    <rect x="150.6" y="49" width="4.8" height="3" rx="1.2" fill="#74643F"/>
+
+    <path d="M77 49c0-4 3-7 7.2-7s7.1 3.2 7.1 7.1c0 5.4-3.3 12.9-7.1 16.7-4.2-3.8-7.2-11.1-7.2-16.8Z" fill="url(#bulbGlassA)"/>
+    <path d="M101 52c0-4 3-7 7.2-7s7.1 3.2 7.1 7.1c0 5.4-3.3 12.9-7.1 16.7-4.2-3.8-7.2-11.1-7.2-16.8Z" fill="url(#bulbGlassB)"/>
+    <path d="M125 48c0-3.8 2.9-6.8 6.8-6.8 3.9 0 6.7 3 6.7 6.9 0 5.1-3.1 12-6.7 15.5-4-3.5-6.8-10.2-6.8-15.6Z" fill="url(#bulbGlassA)"/>
+    <path d="M148 52c0-4 3-7 7.2-7s7.1 3.2 7.1 7.1c0 5.4-3.3 12.9-7.1 16.7-4.2-3.8-7.2-11.1-7.2-16.8Z" fill="url(#bulbGlassB)"/>
+  </g>
+</svg>

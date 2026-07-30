@@ -474,3 +474,10 @@ No storage schema change. No money logic changes beyond preserving historical KH
 - Fixed the swipe action tray seam so the record item stays rounded while the action buttons remain flat.
 - Added more breathing room in the calculator display so large values do not feel cramped against the right edge on iPhone.
 - Reduced visual overhead further for Safari/iPhone thermal mode by simplifying shadows and button transitions.
+
+
+## v3.9.9 Opaque iOS Choice Sheet
+
+- Increased picker sheet opacity so underlying form fields no longer show through.
+- Strengthened the backdrop dim and made option rows more solid for readability.
+- Kept Safari thermal mode free of live backdrop blur.

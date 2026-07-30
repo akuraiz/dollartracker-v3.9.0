@@ -2121,3 +2121,51 @@ html.thermal-lite .topbar{
 html.thermal-lite .ios-calc-grid button{
   box-shadow:none!important;
 }
+
+
+/* ===========================================================================
+   v3.9.9 — Opaque iOS Choice Sheet
+   The picker remains glass-styled but no longer lets form content visually
+   compete through the panel, especially in Safari thermal-lite mode.
+=========================================================================== */
+.choice-sheet{
+  background:
+    radial-gradient(120% 140% at 12% -18%, rgba(255,255,255,.16), transparent 42%),
+    linear-gradient(155deg,
+      color-mix(in srgb,var(--bg2) 94%,var(--surface-2) 6%),
+      color-mix(in srgb,var(--bg) 96%,var(--surface) 4%))!important;
+  border-color:var(--line-strong)!important;
+  box-shadow:0 18px 44px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.14)!important;
+}
+html[data-theme=light] .choice-sheet{
+  background:
+    radial-gradient(120% 140% at 12% -18%, rgba(255,255,255,.94), transparent 44%),
+    linear-gradient(155deg,#fbfbfa,#f0f1f2)!important;
+  box-shadow:0 18px 42px rgba(28,34,40,.16), inset 0 1px 0 rgba(255,255,255,.92)!important;
+}
+.choice-sheet-backdrop.show{
+  background:rgba(0,0,0,.50)!important;
+}
+html[data-theme=light] .choice-sheet-backdrop.show{
+  background:rgba(18,22,28,.28)!important;
+}
+.choice-option{
+  background:color-mix(in srgb,var(--bg2) 88%,var(--surface-2) 12%)!important;
+}
+html[data-theme=light] .choice-option{
+  background:rgba(255,255,255,.92)!important;
+}
+.choice-option.active{
+  background:linear-gradient(135deg,
+    color-mix(in srgb,var(--accent-1) 28%,var(--bg2)),
+    color-mix(in srgb,var(--accent-2) 20%,var(--bg)))!important;
+}
+html[data-theme=light] .choice-option.active{
+  background:linear-gradient(135deg,#ffffff,
+    color-mix(in srgb,var(--accent-1) 22%,#f5f5f4))!important;
+}
+html.thermal-lite .choice-sheet,
+html.thermal-lite[data-theme=light] .choice-sheet{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
