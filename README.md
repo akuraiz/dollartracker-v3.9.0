@@ -501,3 +501,10 @@ No storage schema change. No money logic changes beyond preserving historical KH
 
 - Fixed the amount input so it no longer shows as a separate grey inner box in dark mode.
 - Made the floating Save Record button keyboard-aware on iPhone so it rises above the keyboard and accessory bar instead of getting trapped behind them.
+
+
+## v3.9.13 Amount Field + PWA Keyboard Patch
+
+- Removed the iOS Safari grey inner control from the amount input by forcing the inner number field transparent and moving focus styling to the outer amount wrapper.
+- Improved the floating Save Record button for Safari/Add-to-Home-Screen PWAs by using `visualViewport` top positioning when the keyboard is visible.
+- Keeps the balanced liquid-glass theme from v3.9.11/v3.9.12.

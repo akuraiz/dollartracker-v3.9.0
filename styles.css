@@ -2433,3 +2433,72 @@ html.keyboard-open .floating-save-button{
     bottom:calc(92px + var(--safe-bottom) + var(--keyboard-offset)) !important;
   }
 }
+
+
+/* ===========================================================================
+   v3.9.13 — Amount field inner-box removal + stronger keyboard-aware save
+=========================================================================== */
+:root{--floating-save-top:auto;}
+
+/* The amount input sits inside a custom glass wrapper. On iOS Safari, number
+   inputs can still paint their own rounded grey control and focus outline.
+   Force the inner field to become visually transparent and move focus styling
+   to the outer wrapper instead. */
+.amount-wrap{
+  overflow:hidden!important;
+}
+#amountInput,
+#quickAddAmountInput,
+.amount-wrap input,
+.amount-wrap input:focus,
+.amount-wrap input:focus-visible,
+.amount-wrap input:hover,
+.amount-wrap input:active{
+  -webkit-appearance:none!important;
+  appearance:textfield!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  -webkit-box-shadow:none!important;
+  border-radius:0!important;
+  -webkit-border-radius:0!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  filter:none!important;
+}
+#amountInput,
+#quickAddAmountInput{
+  min-height:60px!important;
+  height:60px!important;
+  padding-top:0!important;
+  padding-bottom:0!important;
+  line-height:60px!important;
+}
+.amount-wrap input::-webkit-outer-spin-button,
+.amount-wrap input::-webkit-inner-spin-button{
+  -webkit-appearance:none!important;
+  margin:0!important;
+}
+.amount-wrap:focus-within{
+  border-color:var(--line-strong)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 0 0 3px color-mix(in srgb,var(--accent-1) 16%,transparent)!important;
+}
+
+/* When iOS exposes the visual viewport, pin the floating save button above
+   the visible viewport rather than only relying on bottom: calc(...). This is
+   the most reliable behavior for Safari + Add to Home Screen PWAs. */
+html.keyboard-open .floating-save-button{
+  top:var(--floating-save-top)!important;
+  bottom:auto!important;
+  z-index:90!important;
+  transform:translate3d(-50%,0,0) scale(1)!important;
+}
+html.keyboard-open body.floating-save-ready .floating-save-button,
+body.floating-save-ready html.keyboard-open .floating-save-button{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}

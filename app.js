@@ -1,7 +1,7 @@
 
 "use strict";
 
-const APP_VERSION = "3.9.12";
+const APP_VERSION = "3.9.13";
 const RECORD_KEY = "dollarTracker.records.v3";
 const SETTINGS_KEY = "dollarTracker.settings.v3";
 const STATE_KEY = "dollarTracker.state.v3";
@@ -3688,22 +3688,47 @@ function initEvents() {
 function updateKeyboardViewportOffset() {
   const vv = window.visualViewport;
   const root = document.documentElement;
-  if (!vv || !root) return;
-  const viewportHeight = window.innerHeight || 0;
-  const keyboardOffset = Math.max(0, Math.round(viewportHeight - vv.height - vv.offsetTop));
+  if (!root) return;
+
+  const focused = document.activeElement;
+  const editingAmount = Boolean(focused && focused.matches?.("#amountInput, #quickAddAmountInput, input, textarea"));
+  let keyboardOffset = 0;
+  let floatingTop = "";
+
+  if (vv) {
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || vv.height;
+    keyboardOffset = Math.max(0, Math.round(viewportHeight - vv.height - vv.offsetTop));
+
+    const keyboardLikelyOpen = editingAmount && (keyboardOffset > 80 || vv.height < viewportHeight * 0.82);
+    if (keyboardLikelyOpen) {
+      const buttonHeight = 62;
+      const gap = 14;
+      const top = Math.max(10, Math.round(vv.offsetTop + vv.height - buttonHeight - gap));
+      floatingTop = `${top}px`;
+    }
+  }
+
   root.style.setProperty("--keyboard-offset", `${keyboardOffset}px`);
-  root.classList.toggle("keyboard-open", keyboardOffset > 120);
+  if (floatingTop) root.style.setProperty("--floating-save-top", floatingTop);
+  else root.style.removeProperty("--floating-save-top");
+  root.classList.toggle("keyboard-open", Boolean(floatingTop));
 }
 
 function initKeyboardViewportTracking() {
   updateKeyboardViewportOffset();
   const vv = window.visualViewport;
-  if (!vv) return;
-  vv.addEventListener("resize", updateKeyboardViewportOffset);
-  vv.addEventListener("scroll", updateKeyboardViewportOffset);
-  window.addEventListener("orientationchange", () => setTimeout(updateKeyboardViewportOffset, 60));
-  document.addEventListener("focusin", updateKeyboardViewportOffset);
-  document.addEventListener("focusout", () => setTimeout(updateKeyboardViewportOffset, 60));
+  if (vv) {
+    vv.addEventListener("resize", updateKeyboardViewportOffset);
+    vv.addEventListener("scroll", updateKeyboardViewportOffset);
+  }
+  window.addEventListener("resize", updateKeyboardViewportOffset);
+  window.addEventListener("orientationchange", () => setTimeout(updateKeyboardViewportOffset, 80));
+  document.addEventListener("focusin", () => {
+    updateKeyboardViewportOffset();
+    setTimeout(updateKeyboardViewportOffset, 80);
+    setTimeout(updateKeyboardViewportOffset, 240);
+  });
+  document.addEventListener("focusout", () => setTimeout(updateKeyboardViewportOffset, 120));
 }
 
 function notifyAppUpdateReady() {
