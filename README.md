@@ -398,3 +398,40 @@ No storage schema change. No money logic changes beyond preserving historical KH
 - Continue testing History selection on real iPhone PWA mode.
 - Tune Quick Add only if it feels useful without crowding the Add flow.
 - Keep recurring transactions separate for a future build with a clean management UI.
+
+## v3.9.1 Profile + Dropdown Polish
+
+- Polished the profile switcher sheet with smoother iOS-style motion and a cleaner active-profile card.
+- Simplified Profile Management so each profile is a compact row first, with editing controls hidden until the user opens that specific profile.
+- Reduced crowding by grouping profile photo, save, archive/restore, and delete actions inside each profile's own edit panel.
+- Restyled native dropdown/select controls with a cleaner glass appearance, stronger focus state, and clearer chevron treatment.
+- Added softer reveal animations to collapsible profile and settings sections.
+- No storage schema or money logic was changed.
+
+
+## v3.9.2 Legacy Import Safety Patch
+
+- Fixed old pre-profile backups importing into the profile app as a full app reset.
+- Old backups without profile data now import into the currently selected profile only.
+- Other profiles, profile photos, profile names, and profile management stay untouched.
+- Profile-aware v3.9+ backups still restore all profiles as a full backup.
+- Added safer import preview wording so the user knows whether the import replaces one profile or the whole app.
+- Preserved imported backup categories and budgets on the target profile.
+- Improved record normalization so records keep categories against their own profile instead of the active profile only.
+
+
+## v3.9.3 Final Functional Completeness Pass
+
+- Audited the profile-era app for unfinished or half-connected functionality.
+- Changed the Danger Zone clear action to clear only the current profile's records, preventing accidental deletion of other family profiles.
+- Updated the Danger Zone wording in English and Khmer to match the safer profile-scoped behavior.
+- Added a clear toast when the profile limit is reached instead of silently doing nothing.
+- Hardened profile avatar import by accepting only safe base64 JPEG/PNG/WebP data URLs and escaping avatar image attributes.
+- Added fallback recovery for profile-aware backups that contain `profileId` records but no profile list, so those records no longer collapse into Me.
+- Restricted selected-record cleanup to the active profile so stale selections cannot cross profiles.
+- Made invalid backup/file-read failures use the in-app toast instead of a browser alert.
+- Added Escape-key support for closing the top open sheet or exiting History selection.
+- Centralized modal-open body state so closing one sheet does not unlock background scroll while another sheet is still open.
+- Guarded invalid backup dates from rendering as Invalid Date.
+- Optimized root language flag images into real small PNG files for faster top-bar rendering.
+- Kept UI simple and avoided adding new visible features in this pass.

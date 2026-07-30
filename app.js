@@ -1,7 +1,7 @@
 
 "use strict";
 
-const APP_VERSION = "3.9.0";
+const APP_VERSION = "3.9.3";
 const RECORD_KEY = "dollarTracker.records.v3";
 const SETTINGS_KEY = "dollarTracker.settings.v3";
 const STATE_KEY = "dollarTracker.state.v3";
@@ -126,7 +126,10 @@ Object.assign(I18N.en, {
   archiveProfileConfirm: "Archive this profile? Its records stay saved and can be restored later.", profilePhotoTooLarge: "Could not use this photo. Try a smaller image.",
   allProfilesBackup: "Backups include all profiles.", backupProfilesLine: "Backup profiles: {count}", unknownProfile: "Unknown",
   importPreviewProfiles: "Import backup?\n\nProfiles: {profiles}\nRecords: {records}\nExported: {date}\nVersion: {version}\n\nThis will replace current data in this browser.",
-  clearProfileRecords: "Clear All Records"
+  importPreviewLegacyProfile: "Import old backup into {profile}?\n\nBackup records: {records}\nCurrent records in {profile}: {current}\nExported: {date}\nVersion: {version}\n\nThis replaces only this profile's records. Other profiles stay untouched.",
+  backupImportedProfile: "Backup imported into {profile}",
+  clearProfileRecords: "Clear Current Profile Records", clearProfileHint:"Tap twice to clear records for the active profile only.", profileLimitReached:"Profile limit reached.",
+  editProfile: "Edit Profile", profileActions: "Profile actions", profilePhoto: "Profile photo"
 });
 
 Object.assign(I18N.km, {
@@ -140,7 +143,10 @@ Object.assign(I18N.km, {
   archiveProfileConfirm: "លាក់ទុកប្រវត្តិរូបនេះ? កំណត់ត្រានឹងនៅរក្សាទុក ហើយអាចស្ដារវិញបាន។", profilePhotoTooLarge: "មិនអាចប្រើរូបនេះបាន។ សូមសាកល្បងរូបតូចជាងនេះ។",
   allProfilesBackup: "Backup រួមបញ្ចូលប្រវត្តិរូបទាំងអស់។", backupProfilesLine: "ប្រវត្តិរូបក្នុង Backup: {count}", unknownProfile: "មិនស្គាល់",
   importPreviewProfiles: "នាំចូល Backup?\n\nប្រវត្តិរូប: {profiles}\nកំណត់ត្រា: {records}\nបាននាំចេញ: {date}\nកំណែ: {version}\n\nវានឹងជំនួសទិន្នន័យបច្ចុប្បន្នក្នុង Browser នេះ។",
-  clearProfileRecords: "លុបកំណត់ត្រាទាំងអស់"
+  importPreviewLegacyProfile: "នាំចូល Backup ចាស់ទៅ {profile}?\n\nកំណត់ត្រា Backup: {records}\nកំណត់ត្រាបច្ចុប្បន្នក្នុង {profile}: {current}\nបាននាំចេញ: {date}\nកំណែ: {version}\n\nវានឹងជំនួសតែកំណត់ត្រារបស់ប្រវត្តិរូបនេះ។ ប្រវត្តិរូបផ្សេងៗនឹងនៅដដែល។",
+  backupImportedProfile: "បាននាំចូល Backup ទៅ {profile}",
+  clearProfileRecords: "លុបកំណត់ត្រាប្រវត្តិរូបបច្ចុប្បន្ន", clearProfileHint:"ចុចពីរដង ដើម្បីលុបតែកំណត់ត្រារបស់ប្រវត្តិរូបបច្ចុប្បន្ន។", profileLimitReached:"ចំនួនប្រវត្តិរូបដល់កំណត់ហើយ។",
+  editProfile: "កែប្រវត្តិរូប", profileActions: "សកម្មភាពប្រវត្តិរូប", profilePhoto: "រូបថតប្រវត្តិរូប"
 });
 
 let records = [];
@@ -160,6 +166,8 @@ let selectionMode = false;
 let activeSwipeCard = null;
 let quickAddState = { description: "Food", category: "food" };
 let profileSheetMode = "switch";
+
+const MODAL_BACKDROP_SELECTORS = ["#profileBackdrop", "#summaryBackdrop", "#historyFilterBackdrop", "#editBackdrop", "#quickAddBackdrop", "#calculatorBackdrop"];
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -228,8 +236,8 @@ function makeProfileId(name = "profile") {
 }
 
 function sanitizeProfileAvatar(value = "") {
-  const text = String(value || "");
-  if (!text.startsWith("data:image/")) return "";
+  const text = String(value || "").trim();
+  if (!/^data:image\/(jpeg|jpg|png|webp);base64,[a-z0-9+/=]+$/i.test(text)) return "";
   return text.length <= 260000 ? text : "";
 }
 
@@ -335,8 +343,9 @@ function profileDisplayName(id = activeProfileId()) {
 
 function profileAvatarHTML(profile, className = "profile-avatar") {
   const safeName = escapeHTML(profile?.name || "Profile");
-  if (profile?.avatarDataUrl) {
-    return `<span class="${className} has-photo"><img src="${profile.avatarDataUrl}" alt="${safeName}" /></span>`;
+  const avatar = sanitizeProfileAvatar(profile?.avatarDataUrl || "");
+  if (avatar) {
+    return `<span class="${className} has-photo"><img src="${escapeHTML(avatar)}" alt="${safeName}" loading="lazy" decoding="async" /></span>`;
   }
   return `<span class="${className}">${escapeHTML(profile?.initials || profileInitials(profile?.name))}</span>`;
 }
@@ -407,6 +416,14 @@ function categoryKeys() {
 
 function categoryKey(category) {
   return categoryKeys().includes(category) ? category : "other";
+}
+
+function categoryKeyForProfile(category, profileId = activeProfileId()) {
+  const key = String(category || "").trim();
+  const profile = profileById(profileId) || activeProfile(true);
+  const defs = normalizeCategoryList(profile?.categories || settings.categories);
+  const keys = defs.map(item => item.id);
+  return keys.includes(key) ? key : "other";
 }
 
 function resetCategoryRelatedData(allowedKeys = categoryKeys()) {
@@ -843,12 +860,12 @@ function renderEditHistory(record) {
   }).join("");
 }
 
-function normalizeRecord(input) {
+function normalizeRecord(input, options = {}) {
   if (!input || typeof input !== "object") return null;
 
   const type = input.type === "In" ? "In" : "Out";
   const originalCurrency = normalizeCurrencyCode(input.originalCurrency || input.currency || input.currencyMode || input.currencySymbol, "USD");
-  const rate = Number(input.exchangeRateAtEntry || input.exchangeRate || settings.exchangeRate || 4000);
+  const rate = Number(input.exchangeRateAtEntry || input.exchangeRate || options.fallbackRate || settings.exchangeRate || 4000);
   const safeRate = Number.isFinite(rate) && rate > 0 ? rate : 4000;
   const numeric = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
 
@@ -871,7 +888,8 @@ function normalizeRecord(input) {
     ? numeric(input.originalAmount)
     : (normalizedOriginalCurrency === "KHR" ? amountUSD * safeRate : amountUSD);
 
-  const profileId = String(input.profileId || "").trim();
+  const forcedProfileId = String(options.profileId || "").trim();
+  const profileId = forcedProfileId || String(input.profileId || "").trim();
   const normalizedProfileId = profileId && profileById(profileId) ? profileId : activeProfileId();
 
   return {
@@ -882,7 +900,7 @@ function normalizeRecord(input) {
     originalAmount,
     originalCurrency: normalizedOriginalCurrency,
     exchangeRateAtEntry: Number(input.exchangeRateAtEntry || input.exchangeRate || safeRate || 4000),
-    category: categoryKey(input.category),
+    category: categoryKeyForProfile(input.category, normalizedProfileId),
     editHistory: Array.isArray(input.editHistory) ? input.editHistory : [],
     description: input.description || input.what || "",
     date: input.date || todayISO(),
@@ -1116,7 +1134,7 @@ function filteredRecords() {
 }
 
 function pruneSelectedRecords() {
-  const existing = new Set(records.map(record => record.id));
+  const existing = new Set(activeRecords().map(record => record.id));
   selectedRecordIds = new Set([...selectedRecordIds].filter(id => existing.has(id)));
 }
 
@@ -1233,6 +1251,7 @@ function displayDate(iso) {
 function displayDateTime(iso) {
   if (!iso) return tr("never");
   const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return tr("never");
   return d.toLocaleString(settings.language === "km" ? "km-KH" : undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
@@ -1279,6 +1298,35 @@ const debouncedHistorySearchRender = debounce(() => {
   render();
 }, 180);
 
+function syncModalOpenState() {
+  const hasOpenSheet = MODAL_BACKDROP_SELECTORS.some(selector => document.querySelector(selector)?.classList.contains("show"));
+  document.body.classList.toggle("modal-open", hasOpenSheet);
+}
+
+function showSheet(selector) {
+  document.querySelector(selector)?.classList.add("show");
+  syncModalOpenState();
+}
+
+function hideSheet(selector) {
+  document.querySelector(selector)?.classList.remove("show");
+  syncModalOpenState();
+}
+
+function closeTopSheet() {
+  const ordered = ["#calculatorBackdrop", "#quickAddBackdrop", "#editBackdrop", "#historyFilterBackdrop", "#summaryBackdrop", "#profileBackdrop"];
+  const top = ordered.find(selector => document.querySelector(selector)?.classList.contains("show"));
+  if (top) {
+    hideSheet(top);
+    return true;
+  }
+  if (selectionUIActive()) {
+    clearSelectedRecords();
+    return true;
+  }
+  return false;
+}
+
 function translateUI() {
   const activeKey = $(".page.active")?.dataset.titleKey || "home";
   setText("pageTitle", tr(activeKey));
@@ -1299,7 +1347,7 @@ function translateUI() {
   setText("appearanceTitle", tr("appearance")); setText("displayModeLabel", tr("displayMode")); setText("darkLabel", tr("dark")); setText("lightLabel", tr("light")); setText("themeTemplateLabel", tr("themeTemplate")); setText("coreThemesText", tr("coreThemes")); setText("signatureThemesText", tr("signatureThemes")); setText("monoThemeText", tr("monoTheme")); setText("goldThemeText", tr("goldTheme")); setText("skyThemeText", tr("skyTheme")); setText("matchaThemeText", tr("matchaTheme")); setText("sunsetThemeText", tr("sunsetTheme")); setText("lavenderThemeText", tr("lavenderTheme")); setText("christmasThemeText", tr("christmasTheme")); setText("pinkThemeText", tr("pinkTheme")); setText("webThemeText", tr("webTheme")); setText("symbioteThemeText", tr("symbioteTheme")); setText("blushThemeText", tr("blushTheme")); setText("oceanThemeText", tr("oceanTheme")); setText("pearlThemeText", tr("pearlTheme"));
   setText("moneySettingsTitle", tr("moneySettings")); setText("exchangeRateTitle", tr("exchangeRate")); setText("exchangeRateHint", tr("exchangeRateHint")); setText("appNameTitle", tr("appName")); setText("appNameHint", tr("appNameHint")); setText("saveSettingsBtn", tr("saveSettings"));
   setText("categoryManagerTitle", tr("categoryManager")); setText("categoryManagerHint", tr("categoryManagerHint")); $("#newCategoryInput").placeholder = tr("newCategoryPlaceholder"); setText("addCategoryBtn", tr("addCategory")); setText("resetCategoriesBtn", tr("resetCategories")); setText("categoryBudgetsTitle", tr("categoryBudgets")); setText("categoryBudgetsHint", tr("categoryBudgetsHint")); setText("budgetCurrencyNote", tr("budgetCurrencyNote")); setText("saveBudgetsBtn", tr("saveBudgets"));
-  setText("dangerZoneTitle", tr("dangerZone")); setText("dangerHintText", tr("dangerHint")); setText("clearDataBtn", Date.now() < clearArmedUntil ? tr("tapAgainClear") : tr("clearAll"));
+  setText("dangerZoneTitle", tr("dangerZone")); setText("dangerHintText", tr("clearProfileHint")); setText("clearDataBtn", Date.now() < clearArmedUntil ? tr("tapAgainClear") : tr("clearProfileRecords"));
   setText("editTitle", tr("editRecord")); setText("editHint", tr("editHint")); setText("closeEditBtn", tr("close"));
   setText("editTypeLabel", tr("type")); setText("editOutLabel", tr("out")); setText("editInLabel", tr("in"));
   setText("editCurrencyLabel", tr("currency")); setText("editAmountLabel", tr("amount")); setText("editCategoryLabel", tr("category"));
@@ -1338,9 +1386,14 @@ function renderProfileSheet() {
   const archived = (settings.profiles || []).filter(profile => profile.archived);
   const activeCard = $("#profileActiveCard");
   if (activeCard) {
+    const activeCount = records.filter(record => record.profileId === active.id).length;
     activeCard.innerHTML = `
       ${profileAvatarHTML(active, "profile-avatar large")}
-      <div><span>${tr("currentProfile")}</span><strong>${escapeHTML(active.name)}</strong></div>
+      <div>
+        <span>${tr("currentProfile")}</span>
+        <strong>${escapeHTML(active.name)}</strong>
+        <small>${activeCount} ${tr(activeCount === 1 ? "record" : "records")}</small>
+      </div>
     `;
   }
   const profileList = $("#profileList");
@@ -1355,42 +1408,54 @@ function renderProfileSheet() {
   }
   const manager = $("#profileManagerList");
   if (manager) {
-    manager.innerHTML = [...list, ...archived].map(profile => {
+    const allProfiles = [...list, ...archived];
+    manager.innerHTML = allProfiles.map(profile => {
       const count = records.filter(record => record.profileId === profile.id).length;
+      const status = profile.archived ? ` • ${tr("archiveProfile")}` : "";
+      const photoAction = profile.avatarDataUrl
+        ? `<button class="ghost-button compact-button" type="button" data-remove-profile-photo="${escapeHTML(profile.id)}">${tr("removePhoto")}</button>`
+        : "";
       return `
-        <article class="profile-manager-row ${profile.archived ? "archived" : ""}">
-          <div class="profile-manager-top">
-            ${profileAvatarHTML(profile)}
-            <div class="profile-manager-main">
-              <input type="text" maxlength="28" value="${escapeHTML(profile.name)}" data-profile-name="${escapeHTML(profile.id)}" aria-label="${tr("profileName")}" />
-              <small>${count} ${tr(count === 1 ? "record" : "records")}${profile.archived ? ` • ${tr("archiveProfile")}` : ""}</small>
+        <details class="profile-manager-card ${profile.archived ? "archived" : ""}">
+          <summary class="profile-manager-summary">
+            <div class="profile-manager-top">
+              ${profileAvatarHTML(profile)}
+              <div class="profile-manager-title">
+                <strong>${escapeHTML(profile.name)}</strong>
+                <small>${count} ${tr(count === 1 ? "record" : "records")}${status}</small>
+              </div>
+            </div>
+            <span class="profile-edit-chip">${tr("editProfile")}</span>
+          </summary>
+          <div class="profile-manager-body">
+            <label class="profile-field-label"><span>${tr("profileName")}</span><input type="text" maxlength="28" value="${escapeHTML(profile.name)}" data-profile-name="${escapeHTML(profile.id)}" aria-label="${tr("profileName")}" /></label>
+            <div class="profile-photo-actions" aria-label="${tr("profilePhoto")}">
+              <label class="secondary-button compact-button profile-photo-button">${tr("choosePhoto")}<input type="file" accept="image/*" data-profile-photo="${escapeHTML(profile.id)}" /></label>
+              ${photoAction}
+            </div>
+            <div class="profile-save-row">
+              <button class="primary-button compact-button" type="button" data-save-profile="${escapeHTML(profile.id)}">${tr("save")}</button>
+            </div>
+            <div class="profile-danger-row" aria-label="${tr("profileActions")}">
+              ${profile.archived
+                ? `<button class="secondary-button compact-button" type="button" data-restore-profile="${escapeHTML(profile.id)}">${tr("restoreProfile")}</button>`
+                : `<button class="ghost-button compact-button" type="button" data-archive-profile="${escapeHTML(profile.id)}">${tr("archiveProfile")}</button>`}
+              <button class="danger-button compact-button" type="button" data-delete-profile="${escapeHTML(profile.id)}">${tr("deleteProfile")}</button>
             </div>
           </div>
-          <div class="profile-manager-actions">
-            <label class="secondary-button compact-button profile-photo-button">${tr("choosePhoto")}<input type="file" accept="image/*" data-profile-photo="${escapeHTML(profile.id)}" /></label>
-            <button class="secondary-button compact-button" type="button" data-save-profile="${escapeHTML(profile.id)}">${tr("save")}</button>
-            <button class="ghost-button compact-button" type="button" data-remove-profile-photo="${escapeHTML(profile.id)}">${tr("removePhoto")}</button>
-            ${profile.archived
-              ? `<button class="secondary-button compact-button" type="button" data-restore-profile="${escapeHTML(profile.id)}">${tr("restoreProfile")}</button>`
-              : `<button class="ghost-button compact-button" type="button" data-archive-profile="${escapeHTML(profile.id)}">${tr("archiveProfile")}</button>`}
-            <button class="danger-button compact-button" type="button" data-delete-profile="${escapeHTML(profile.id)}">${tr("deleteProfile")}</button>
-          </div>
-        </article>
+        </details>
       `;
     }).join("");
   }
 }
-
 function openProfileSheet() {
   saveState();
   renderProfileSheet();
-  $("#profileBackdrop")?.classList.add("show");
-  document.body.classList.add("modal-open");
+  showSheet("#profileBackdrop");
 }
 
 function closeProfileSheet() {
-  $("#profileBackdrop")?.classList.remove("show");
-  document.body.classList.remove("modal-open");
+  hideSheet("#profileBackdrop");
 }
 
 function switchProfile(id) {
@@ -1427,7 +1492,10 @@ function addProfile() {
     showToast(tr("profileExists"));
     return;
   }
-  if ((settings.profiles || []).length >= MAX_PROFILES) return;
+  if ((settings.profiles || []).length >= MAX_PROFILES) {
+    showToast(tr("profileLimitReached"));
+    return;
+  }
   saveActiveProfileLedger();
   const id = makeProfileId(`profile-${name}`);
   settings.profiles.push(normalizeProfile({ id, name, categories: defaultCategoryList(), categoryBudgets: {} }, new Set(settings.profiles.map(p => p.id))));
@@ -2205,14 +2273,12 @@ function openCalculator() {
   calcState.stored = null;
   calcState.operator = null;
   calcState.fresh = true;
-  $("#calculatorBackdrop").classList.add("show");
-  document.body.classList.add("modal-open");
+  showSheet("#calculatorBackdrop");
   updateCalcDisplay();
 }
 
 function closeCalculator() {
-  $("#calculatorBackdrop").classList.remove("show");
-  document.body.classList.remove("modal-open");
+  hideSheet("#calculatorBackdrop");
 }
 
 function calcNumber() {
@@ -2337,14 +2403,12 @@ function openQuickAdd(type = "Out") {
   if (input) input.checked = true;
   if ($("#quickAddAmountInput")) $("#quickAddAmountInput").value = "";
   renderQuickAddSheet();
-  $("#quickAddBackdrop")?.classList.add("show");
-  document.body.classList.add("modal-open");
+  showSheet("#quickAddBackdrop");
   setTimeout(() => $("#quickAddAmountInput")?.focus(), 180);
 }
 
 function closeQuickAdd() {
-  $("#quickAddBackdrop")?.classList.remove("show");
-  document.body.classList.remove("modal-open");
+  hideSheet("#quickAddBackdrop");
 }
 
 function saveQuickAddRecord(event) {
@@ -2369,7 +2433,7 @@ function saveQuickAddRecord(event) {
     originalAmount: rawAmount,
     originalCurrency: settings.displayCurrency,
     exchangeRateAtEntry: Number(settings.exchangeRate || 4000),
-    category: quickAddState.category || "other",
+    category: categoryKey(quickAddState.category || "other"),
     editHistory: [],
     description: quickAddState.description || (type === "In" ? tr("addedFallback") : tr("usedFallback")),
     date: todayISO(),
@@ -2492,12 +2556,12 @@ function openEditRecord(id) {
     $("#editDateInput").value = record.date || todayISO();
     $("#editNoteInput").value = record.note || "";
     renderEditHistory(record);
-    $("#editBackdrop").classList.add("show");
+    showSheet("#editBackdrop");
     updateSegmentedPills();
 }
 
 function closeEditRecord() {
-  $("#editBackdrop").classList.remove("show");
+  hideSheet("#editBackdrop");
   $("#editRecordForm").reset();
   $("#editRecordId").value = "";
 }
@@ -2593,42 +2657,138 @@ function saveEditedRecord(event) {
 
 
 
-function backupPreviewText(data, normalizedRecords) {
+function backupHasProfileData(data, rawRecords = []) {
+  if (Array.isArray(data?.settings?.profiles) && data.settings.profiles.length) return true;
+  return rawRecords.some(record => record && typeof record === "object" && String(record.profileId || "").trim());
+}
+
+function importedBackupRate(data) {
+  const value = Number(data?.settings?.exchangeRate || data?.exchangeRate || settings.exchangeRate || 4000);
+  return Number.isFinite(value) && value > 0 ? value : Number(settings.exchangeRate || 4000) || 4000;
+}
+
+function backupPreviewText(data, rawRecords, mode = "full") {
   const exportedAt = data?.exportedAt ? displayDateTime(data.exportedAt) : tr("never");
   const version = data?.version || "Unknown";
+  if (mode === "legacy-profile") {
+    const profile = profileDisplayName(activeProfileId());
+    const current = activeRecords().length;
+    return tr("importPreviewLegacyProfile", {
+      profile,
+      records: rawRecords.length,
+      current,
+      date: exportedAt,
+      version
+    });
+  }
   const profileCount = Array.isArray(data?.settings?.profiles) && data.settings.profiles.length ? data.settings.profiles.length : 1;
   return tr("importPreviewProfiles", {
     profiles: profileCount,
-    records: normalizedRecords.length,
+    records: rawRecords.length,
     date: exportedAt,
     version
   });
 }
 
+function dedupeRecordsForImport(list) {
+  const map = new Map();
+  list.forEach(record => {
+    if (!record) return;
+    const signature = record.id
+      ? `id:${record.id}`
+      : `legacy:${record.profileId}|${record.type}|${record.date}|${record.amountUSD}|${record.originalAmount}|${record.originalCurrency}|${record.description}|${record.note}|${record.createdAt}`;
+    map.set(signature, record);
+  });
+  return Array.from(map.values());
+}
+
+function importLegacyBackupIntoActiveProfile(data, importedRecords) {
+  const targetProfileId = activeProfileId();
+  const targetProfile = activeProfile(true);
+  const targetName = profileDisplayName(targetProfileId);
+  const backupSettings = data?.settings && typeof data.settings === "object" ? data.settings : {};
+  const backupCategories = normalizeCategoryList(backupSettings.categories || defaultCategoryList());
+  const backupBudgets = normalizeBudgetMap(backupSettings.categoryBudgets || {}, backupCategories);
+
+  if (targetProfile) {
+    targetProfile.categories = backupCategories;
+    targetProfile.categoryBudgets = backupBudgets;
+    targetProfile.draft = null;
+  }
+  settings.categories = backupCategories;
+  settings.categoryBudgets = backupBudgets;
+
+  const backupCurrency = normalizeCurrencyCode(backupSettings.displayCurrency || backupSettings.currencyMode || backupSettings.currency, settings.displayCurrency);
+  if (["USD", "KHR"].includes(backupCurrency)) settings.displayCurrency = backupCurrency;
+  const backupRate = importedBackupRate(data);
+  if (Number.isFinite(backupRate) && backupRate > 0) settings.exchangeRate = backupRate;
+
+  const nextRecords = dedupeRecordsForImport(importedRecords.map(item => normalizeRecord(item, {
+    profileId: targetProfileId,
+    fallbackRate: backupRate
+  })).filter(Boolean));
+
+  records = records.filter(record => (record.profileId || DEFAULT_PROFILE_ID) !== targetProfileId).concat(nextRecords);
+  resetHistorySelectionState();
+  settings.lastBackupRecordCount = records.length;
+  saveRecords();
+  saveSettings();
+  resetHistoryVisibleCount();
+  saveState();
+  setPage("home", { render: false });
+  render();
+  showToast(tr("backupImportedProfile", { profile: targetName }));
+}
+
+function profilesFromImportedRecords(importedRecords = []) {
+  const ids = [...new Set(importedRecords.map(record => String(record?.profileId || "").trim()).filter(Boolean))];
+  if (!ids.length) return [];
+  return ids.slice(0, MAX_PROFILES).map((id, index) => normalizeProfile({
+    id,
+    name: id === DEFAULT_PROFILE_ID ? "Me" : `Profile ${index + 1}`,
+    categories: defaultCategoryList(),
+    categoryBudgets: {}
+  }, new Set()));
+}
+
+function importProfileAwareBackup(data, importedRecords) {
+  const incomingSettings = data.settings && typeof data.settings === "object" ? { ...defaultSettings, ...data.settings } : { ...defaultSettings };
+  if ((!Array.isArray(incomingSettings.profiles) || !incomingSettings.profiles.length) && importedRecords.some(record => record?.profileId)) {
+    incomingSettings.profiles = profilesFromImportedRecords(importedRecords);
+    incomingSettings.activeProfileId = incomingSettings.profiles[0]?.id || DEFAULT_PROFILE_ID;
+  }
+  settings = sanitizeSettings(incomingSettings);
+  records = dedupeRecordsForImport(importedRecords.map(item => normalizeRecord(item, {
+    fallbackRate: importedBackupRate(data)
+  })).filter(Boolean));
+  resetHistorySelectionState();
+  settings.lastBackupRecordCount = records.length;
+  saveRecords();
+  saveSettings();
+  resetHistoryVisibleCount();
+  saveState();
+  setPage("home", { render: false });
+  render();
+  showToast(tr("backupImported"));
+}
+
 function importBackup(file) {
   if (!file) return;
   const reader = new FileReader();
+  reader.onerror = () => showToast(tr("importError"));
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
       if (!hasImportableRecordsContainer(data)) throw new Error("Invalid backup");
-      const importedRecords = extractRecordsFromValue(data);
-      const previewRecords = importedRecords.map(item => item && typeof item === "object" ? item : null).filter(Boolean);
-      if (!confirm(backupPreviewText(data, previewRecords))) return;
+      const importedRecords = extractRecordsFromValue(data).map(item => item && typeof item === "object" ? item : null).filter(Boolean);
+      const profileAware = backupHasProfileData(data, importedRecords);
+      const mode = profileAware ? "full" : "legacy-profile";
+      if (!confirm(backupPreviewText(data, importedRecords, mode))) return;
 
-      settings = sanitizeSettings(data.settings ? { ...defaultSettings, ...data.settings } : { ...defaultSettings });
-      records = importedRecords.map(normalizeRecord).filter(Boolean);
-      resetHistorySelectionState();
-      settings.lastBackupRecordCount = records.length;
-      saveRecords();
-      saveSettings();
-      resetHistoryVisibleCount();
-      saveState();
-      setPage("home", { render: false });
-      render();
-      showToast(tr("backupImported"));
+      if (profileAware) importProfileAwareBackup(data, importedRecords);
+      else importLegacyBackupIntoActiveProfile(data, importedRecords);
     } catch {
-      alert(tr("importError"));
+      showToast(tr("importError"));
     } finally {
       const input = $("#importBackupInput");
       if (input) input.value = "";
@@ -2648,13 +2808,11 @@ function updateHistoryFilterButton() {
 }
 
 function openHistoryFilter() {
-  $("#historyFilterBackdrop").classList.add("show");
-  document.body.classList.add("modal-open");
+  showSheet("#historyFilterBackdrop");
 }
 
 function closeHistoryFilter() {
-  $("#historyFilterBackdrop").classList.remove("show");
-  document.body.classList.remove("modal-open");
+  hideSheet("#historyFilterBackdrop");
 }
 
 function applyHistoryFilter() {
@@ -2700,7 +2858,8 @@ function clearEverything() {
 }
 
 function finishClearEverything() {
-  records = [];
+  const targetProfileId = activeProfileId();
+  records = records.filter(record => (record.profileId || DEFAULT_PROFILE_ID) !== targetProfileId);
   activeFilter = "All";
   searchTerm = "";
   fromDate = "";
@@ -2710,10 +2869,13 @@ function finishClearEverything() {
   selectedRecordIds.clear();
   selectionMode = false;
 
-  const keysToRemove = new Set([RECORD_KEY, STATE_KEY, ...LEGACY_RECORD_KEYS, "wifeyMoneyRecords.liquid.v1"]);
+  const profile = activeProfile(true);
+  if (profile) profile.draft = null;
+
+  const keysToRemove = new Set([...LEGACY_RECORD_KEYS, "wifeyMoneyRecords.liquid.v1"]);
   for (let i = localStorage.length - 1; i >= 0; i--) {
     const key = localStorage.key(i);
-    if (/wifey.*record|dollartracker.*record|money.*record/i.test(key || "")) keysToRemove.add(key);
+    if (key !== RECORD_KEY && /wifey.*record|dollartracker.*record|money.*record/i.test(key || "")) keysToRemove.add(key);
   }
   keysToRemove.forEach(key => localStorage.removeItem(key));
 
@@ -2787,6 +2949,11 @@ function initEvents() {
     if (element?.closest?.(".record-card, .nav-item, .quick-card, .chip, .history-filter-btn")) {
       clearNativeTextSelection();
     }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
+    if (closeTopSheet()) event.preventDefault();
   });
 
   document.addEventListener("pointerdown", event => {
@@ -2949,10 +3116,10 @@ function initEvents() {
     if (event.target.id === "historyFilterBackdrop") closeHistoryFilter();
   });
 
-  $("#summaryBtn").addEventListener("click", () => { renderSummary(); $("#summaryBackdrop").classList.add("show"); });
+  $("#summaryBtn").addEventListener("click", () => { renderSummary(); showSheet("#summaryBackdrop"); });
   $("#selectModeBtn")?.addEventListener("click", toggleSelectionMode);
-  $("#closeSummaryBtn").addEventListener("click", () => $("#summaryBackdrop").classList.remove("show"));
-  $("#summaryBackdrop").addEventListener("click", event => { if (event.target.id === "summaryBackdrop") $("#summaryBackdrop").classList.remove("show"); });
+  $("#closeSummaryBtn").addEventListener("click", () => hideSheet("#summaryBackdrop"));
+  $("#summaryBackdrop").addEventListener("click", event => { if (event.target.id === "summaryBackdrop") hideSheet("#summaryBackdrop"); });
   $("#clearSelectionBtn")?.addEventListener("click", clearSelectedRecords);
 
   $$("[data-template-choice]").forEach(button => button.addEventListener("click", () => {
@@ -3100,7 +3267,6 @@ function boot() {
 
   render({ translate: true });
   registerServiceWorker();
-  console.log(`DollarTracker ${APP_VERSION} loaded`, { records: records.length, settings });
 }
 
 boot();
