@@ -1,7 +1,7 @@
 
 "use strict";
 
-const APP_VERSION = "3.9.11";
+const APP_VERSION = "3.9.12";
 const RECORD_KEY = "dollarTracker.records.v3";
 const SETTINGS_KEY = "dollarTracker.settings.v3";
 const STATE_KEY = "dollarTracker.state.v3";
@@ -3684,6 +3684,28 @@ function initEvents() {
   window.addEventListener("resize", () => { applyDevicePerformanceMode(); updateNavPill(); });
 }
 
+
+function updateKeyboardViewportOffset() {
+  const vv = window.visualViewport;
+  const root = document.documentElement;
+  if (!vv || !root) return;
+  const viewportHeight = window.innerHeight || 0;
+  const keyboardOffset = Math.max(0, Math.round(viewportHeight - vv.height - vv.offsetTop));
+  root.style.setProperty("--keyboard-offset", `${keyboardOffset}px`);
+  root.classList.toggle("keyboard-open", keyboardOffset > 120);
+}
+
+function initKeyboardViewportTracking() {
+  updateKeyboardViewportOffset();
+  const vv = window.visualViewport;
+  if (!vv) return;
+  vv.addEventListener("resize", updateKeyboardViewportOffset);
+  vv.addEventListener("scroll", updateKeyboardViewportOffset);
+  window.addEventListener("orientationchange", () => setTimeout(updateKeyboardViewportOffset, 60));
+  document.addEventListener("focusin", updateKeyboardViewportOffset);
+  document.addEventListener("focusout", () => setTimeout(updateKeyboardViewportOffset, 60));
+}
+
 function notifyAppUpdateReady() {
   if (notifyAppUpdateReady.shown) return;
   notifyAppUpdateReady.shown = true;
@@ -3720,6 +3742,7 @@ function applyDevicePerformanceMode() {
 
 function boot() {
   applyDevicePerformanceMode();
+  initKeyboardViewportTracking();
   loadData();
   restoreDraft();
   initEvents();

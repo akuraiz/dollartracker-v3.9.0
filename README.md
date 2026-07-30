@@ -495,3 +495,9 @@ No storage schema change. No money logic changes beyond preserving historical KH
 - Restored the original liquid-glass feel in dark mode instead of the heavy opaque black look.
 - Kept native iOS pickers.
 - Preserved the Safari thermal optimizations that matter most: no continuous orb animation, lower blur radii, lighter shadows, and calmer GPU activity.
+
+
+## v3.9.12 Amount Input + Keyboard Save Fix
+
+- Fixed the amount input so it no longer shows as a separate grey inner box in dark mode.
+- Made the floating Save Record button keyboard-aware on iPhone so it rises above the keyboard and accessory bar instead of getting trapped behind them.
